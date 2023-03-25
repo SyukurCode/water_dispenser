@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+  app:
+#    container_name: printer_app
+    build:
+        context: ./
+        dockerfile: Dockerfile
+#    image: syukurdocker/thermal_printer
+    restart: always
+    ports:
+        - '5000:5000'

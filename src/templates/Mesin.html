@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link href="https://fonts.googleapis.com/css?family=Oxygen|Raleway&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="/static/js/js-fluid-meter.js"></script>
+	<style>
+		body {
+  			background: gray;
+			padding:3%
+		}
+		input {
+			text-align: center;
+		}
+		button{
+			text-align: center;
+		}
+		.content {
+			text-align: center;
+			max-width: 800px;
+			height: 600px;
+			margin: auto;
+			background: #D0D3D4 ;
+			padding: 4%;
+		}
+		h1 {
+			max-width: 100%;
+			height: auto;
+		}
+		.btn-circle.btn-xl {
+			width: 90px;
+			height: 90px;
+			padding: 13px 18px;
+			border-radius: 60px;
+			font-size: 12px;
+			text-align: center;
+		}
+		.led-box {
+		  height: 30px;
+		  width: 25%;
+		  margin: 10px 0;
+		  float: left;
+		}
+
+		.led-box p {
+		  font-size: 12px;
+		  text-align: center;
+		  margin: 1em;
+		  padding-bottom: 5%;
+		}
+
+		.led-green {
+			margin: 0 auto;
+			width: 24px;
+			height: 24px;
+			background-color: #144C05;
+			border-radius: 50%;
+			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 0px;
+		}
+		
+		.led-yellow {
+			margin: 0 auto;
+			width: 24px;
+			height: 24px;
+			background-color: #AA0;
+			border-radius: 50%;
+			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0px;
+	    }
+		
+		.led-red {
+			margin: 0 auto;
+			width: 24px;
+			height: 24px;
+			background-color: #A00;
+			border-radius: 50%;
+			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0px;
+		}
+		
+		.led-blue {
+			margin: 0 auto;
+			width: 24px;
+			height: 24px;
+			background-color: #135A6A;
+			border-radius: 50%;
+			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #006 0 -1px 9px, #3F8CFF 0 2px 0px;
+		}
+		.text-show {
+			margin: 0 auto;
+			font-size: 18px;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="content">
+		<div class="row p-1">
+			<div class="col-3 text-end led-box">
+				<div id="ledStatus" class="led-red"></div>
+				<p>On/Off</p>
+			</div>
+			<div class="col-3 text-end led-box">
+				<div id="ledReady" class="led-green"></div>
+				<p>Ready</p>
+			</div>
+			<div class="col-3 text-end led-box">
+				<div id="ledFilling" class="led-yellow"></div>
+				<p>Filling</p>
+			</div>
+			<div class="col-3 text-end led-box">
+				<div id="ledWater" class="led-blue"></div>
+				<p>Water</p>
+			</div>
+		</div>
+		<hr>
+		</br>
+		<div class="row p-1">
+			<div class="col-3 text-start" style="padding-left:8%; padding-top:2%;"> 
+				<div class="row p-1 form-check">
+				  <label class="form-check-label" for="flexRadioDefault1">
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault1" onclick="volumeSet(this.value)" value="125" disabled>
+					<span class="text-show" id="showVolume">1/2 Glass</span>
+				  </label>
+				</div>
+				
+				<div class="row p-1 form-check">
+				  <label class="form-check-label" for="flexRadioDefault2">
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault2" onclick="volumeSet(this.value)" value="250" checked disabled>
+					<span class="text-show" id="showVolume">1 Glass</span>
+				  </label>
+				</div>
+				<div class="row p-1 form-check">
+				  <label class="form-check-label" for="flexRadioDefault3">
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault3" onclick="volumeSet(this.value)" value="300" disabled>
+						<span class="text-show" id="showVolume">300</span>ml
+				  </label>
+				</div>
+				<div class="row p-1 form-check">
+				  <label class="form-check-label" for="flexRadioDefault4">
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault4" onclick="volumeSet(this.value)" value="500" disabled>
+						<span class="text-show" id="showVolume">500</span>ml
+				  </label>
+				</div>
+				
+				<div class="row p-1 form-check">
+				  <label class="form-check-label" for="flexRadioDefault5">
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="200" onclick="volumeSet(this.value)" disabled>
+						<input class="text-show" type="number" min="200" max="1000" value="200" style="max-width: 50px" step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
+				  </label>
+				</div>
+			</div>
+			<div class="col-3 text-center">
+				<div class="row p-1">
+					<div class="col text-center">
+						<input class="btn btn-info btn-circle btn-xl" type="button" id="btnNormal" value="Normal" / disabled>
+					</div>
+				</div>
+				<div class="row p-1">
+					<div class="col text-center">
+						<input class="btn btn-warning btn-circle btn-xl"  type="button" id="btnWarm" value="Warm"/ disabled>
+					</div>
+				</div>
+				<div class="row p-1">
+					<div class="col text-center">
+						<input class="btn btn-danger btn-circle btn-xl"  type="button" id="btnHot" value="Hot"/ disabled>
+					</div>
+				</div>
+				<div class="row p-1">
+					<div class="col text-center">
+						<input class="btn btn-secondary btn-circle btn-xl"  type="button" id="btnStop" value="Stop"/ disabled>
+					</div>
+				</div>
+			</div>
+			<div class="col-6 text-center" style="padding-top:5%">
+				<div id="fluid-meter-3"></div>
+				<label>capacity :<strong id="capacity"> 0ml</strong></label>
+			</div>
+		</div>
+    </div>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+    //led
+	$( function() {
+	  var $winHeight = $( window ).height()
+	  $( '.container' ).height( $winHeight );
+	});
+    //led
+	 var capacityRequest = 250;
+	 var client = new Paho.MQTT.Client("192.168.31.88", Number(9001), "web");
+	 var glassWeight = 0;
+	 
+	 
+	 //water fill
+	var fm3 = new FluidMeter();
+		fm3.init({
+			targetContainer: document.getElementById("fluid-meter-3"),
+			fillPercentage: 0,
+			options: {
+				fontSize: "30px",
+				drawPercentageSign: true,
+				drawBubbles: false,
+				size: 300,
+				borderWidth: 19,
+				backgroundColor: "#e2e2e2",
+				foregroundColor: "#fafafa",
+				foregroundFluidLayer: {
+					fillStyle: "#16E1FF",
+					angularSpeed: 30,
+					maxAmplitude: 5,
+					frequency: 30,
+					horizontalSpeed: -20
+				},
+				backgroundFluidLayer: {
+					fillStyle: "#4F8FC6",
+					angularSpeed: 100,
+					maxAmplitude: 3,
+					frequency: 22,
+					horizontalSpeed: 20
+				}	
+			}
+		});
+
+        // set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // connect the client
+        client.connect({ 
+            onSuccess: onConnect,
+            userName: "syukur",
+            password: "syukur123***"
+        });
+
+        // called when the client connects
+        function onConnect() {
+            // Once a connection has been made, make a subscription and send a message.
+            console.log("onConnect");
+            client.subscribe("web");
+            startUp();
+        }
+
+        // called when the client loses its connection
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log("onConnectionLost:" + responseObject.errorMessage);
+				disabledAll();
+				ledRed("off");
+            }
+        }
+
+        // called when a message arrives
+        function onMessageArrived(message) {
+			console.log("New message: " + message.payloadString);
+			let text = message.payloadString;
+			const myArray = text.split("/");
+			console.log("Event: " + myArray[1]);
+			console.log("Value: " + myArray[2]);
+			
+			if(myArray[1] == "status")
+			{
+				if(myArray[2] == "online")
+				{
+					ledRed("on");
+				}
+			}
+			if(myArray[1] == "water")
+			{
+				if(myArray[2] == 0)
+				{
+					ledBlue("off");
+				}
+				if(myArray[2] == 1)
+				{
+					ledBlue("on");
+				}
+			}
+			if(myArray[1] == "filling")
+			{
+				ledYellow("on");
+				var percent = myArray[2];
+				if(percent > -1 && percent < 101.0)
+				{
+					fm3.setPercentage(percent);
+					disabledAll();
+					let  capacity = 0;
+					capacity = percent/100 * capacityRequest
+					document.getElementById("capacity").innerHTML = capacity.toString() + "ml";
+					document.getElementById("btnStop").disabled = false;
+				}
+			}
+			if(myArray[1] == "measuring")
+			{
+				disabledAll();
+			}
+			if(myArray[1] == "glass")
+			{
+				ledYellow("off");
+				glassWeight = myArray[2];
+				
+				disabledAll();
+				
+				if(glassWeight > 5.0)
+				{
+					enabledAll()
+				}
+				if(glassWeight < 5.0)
+				{
+					fm3.setPercentage(0);
+					document.getElementById("capacity").innerHTML = "0ml";
+				}
+				
+			}
+        }
+		function sendMessage(destination,msg)
+		{
+			message = new Paho.MQTT.Message(msg);
+            message.destinationName = destination;
+            client.send(message);
+		}
+		function ledRed(state)
+		{
+			const element = document.getElementById("ledStatus");
+			if(state == "on") 
+			{
+				element.style.backgroundColor = "#F00";
+				element.style.boxShadow = "rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px";
+			}
+			else
+			{
+				element.style.backgroundColor = "#A00";
+				element.style.boxShadow = "rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0px";
+			}
+		}
+		function ledGreen(state)
+		{
+			const element = document.getElementById("ledReady");
+			if(state == "on") 
+			{
+				element.style.backgroundColor = "#ABFF00";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;";
+			}
+			else
+			{
+				element.style.backgroundColor = "#144C05";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 0px;";
+			}
+		}
+		function ledYellow(state)
+		{
+			
+			const element = document.getElementById("ledFilling");
+			if(state == "on") 
+			{
+				element.style.backgroundColor = "#FF0";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #89FF00 0 2px 12px;";
+			}
+			else
+			{
+				element.style.backgroundColor = "#AA0";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0px;";
+			}
+		}
+	    function ledBlue(state)
+		{
+			
+			const element = document.getElementById("ledWater");
+			if(state == "on") 
+			{
+				element.style.backgroundColor = "#24E0FF";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #006 0 -1px 9px, #3F8CFF 0 2px 14px;";
+			}
+			else
+			{
+				element.style.backgroundColor = "#135A6A";
+				element.style.boxShadow = "box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #006 0 -1px 9px, #3F8CFF 0 2px 0px;";
+			}
+		}
+		function startUp()
+		{
+			sendMessage("waterdispenser","/status/0");
+		}
+		function disabledAll()
+		{
+			ledGreen("off");
+			document.getElementById("btnNormal").disabled = true;
+			document.getElementById("btnWarm").disabled = true;
+			document.getElementById("btnHot").disabled = true;
+			document.getElementById("flexRadioDefault1").disabled = true;
+			document.getElementById("flexRadioDefault2").disabled = true;
+			document.getElementById("flexRadioDefault3").disabled = true;
+			document.getElementById("flexRadioDefault4").disabled = true;
+			document.getElementById("flexRadioDefault5").disabled = true;
+		}	
+		function enabledAll()
+		{
+			document.getElementById("btnNormal").disabled = false;
+			document.getElementById("btnWarm").disabled = false;
+			document.getElementById("btnHot").disabled = false;
+			document.getElementById("flexRadioDefault1").disabled = false;
+			document.getElementById("flexRadioDefault2").disabled = false;
+			document.getElementById("flexRadioDefault3").disabled = false;
+			document.getElementById("flexRadioDefault4").disabled = false;
+			document.getElementById("flexRadioDefault5").disabled = false;
+			ledGreen("on");
+			document.getElementById("btnStop").disabled = true;
+		}
+		function volumeSet(ml)
+		{
+			capacityRequest = ml;
+			if(document.getElementById("flexRadioDefault5").checked)
+				document.getElementById("customVolume").disabled = false;
+			else
+				document.getElementById("customVolume").disabled = true;
+		}
+		document.getElementById("btnNormal").addEventListener("click", function (event) {
+            sendMessage("waterdispenser","/normal/" + capacityRequest);
+			disabledAll();
+        });
+		document.getElementById("btnWarm").addEventListener("click", function (event) {
+            sendMessage("waterdispenser","/warm/" + capacityRequest);
+			disabledAll();
+        });
+		document.getElementById("btnHot").addEventListener("click", function (event) {
+            sendMessage("waterdispenser","/hot/" + capacityRequest);
+			disabledAll();
+        });
+		document.getElementById("btnStop").addEventListener("click", function (event) {
+            sendMessage("waterdispenser","/stop/0");
+			document.getElementById("btnStop").disabled = true;
+        });
+		document.getElementById("flexRadioDefault5").addEventListener("click", function (event) {
+			if(document.getElementById("flexRadioDefault5").checked)
+				document.getElementById("customVolume").disabled = false;
+			else
+				document.getElementById("customVolume").disabled = true;
+        });
+		
+		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+		  document.body.requestFullscreen().then(res=>console.log(res)).catch(err=>console.log(err));
+		  screen.orientation.lock('landscape').then(res=>console.log(res)).catch(err=>console.log(err))
+		}
+		else
+		{
+			function openFullscreen() {
+			if (elem.requestFullscreen) {
+				elem.requestFullscreen();
+			  } else if (elem.webkitRequestFullscreen) { /* Safari */
+				elem.webkitRequestFullscreen();
+			  } else if (elem.msRequestFullscreen) { /* IE11 */
+				elem.msRequestFullscreen();
+			  }
+			}
+		}
+
+    //window.onload = function () {
+    //  document.getElementById("submit-percentage-3").onclick = function () {
+    //    fm3.setPercentage(Number(document.getElementById('percentage-3').value))
+    //  }
+    //};
+
+     //water fill
+		
+</script>
+
+</body>
+</html> 
