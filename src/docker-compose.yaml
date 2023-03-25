@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   app:
-#    container_name: printer_app
+    container_name: water_dispenser_app
     build:
         context: ./
         dockerfile: Dockerfile
