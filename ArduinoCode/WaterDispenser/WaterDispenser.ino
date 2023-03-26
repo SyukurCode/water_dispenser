@@ -22,6 +22,7 @@ unsigned long previousMilis = 0;
 boolean isStableReading = false;
 boolean isWaterOK = false;
 boolean isStop = false;
+long lastReconnectAttempt = 0;
 
 //mqtt
 const char* mqttServer = "192.168.31.88";
@@ -79,7 +80,7 @@ void setup()
   while (!client.connected()) 
   {
     Serial.println("Connecting to MQTT...");
-    if (client.connect("ESP8266Client", mqttUser, mqttPassword )) 
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword)) 
     {
       Serial.println("connected");
     } 
@@ -416,21 +417,44 @@ void pumpON(int percentSpeed)
   int pwmSpeed = map(percentSpeed,0,100,0,255);
   analogWrite(PUMP,pwmSpeed);
 }
+boolean reconnect() {
+  if (client.connect("ESP8266Client", mqttUser, mqttPassword)) 
+  {
+    client.publish(topic, "/status/online");
+    waterCheck();
+    client.subscribe("waterdispenser");
+  }
+  return client.connected();
+}
 void loop() 
 {
-  client.loop();
-  if(!digitalRead(WATER_LEVEL))
+  if (!client.connected()) 
   {
-    float currentValue = getWeight();
-    if(abs(currentValue - previousValue) > 1.0)
+    long now = millis();
+    if (now - lastReconnectAttempt > 5000) 
     {
-      previousValue = currentValue;
-      sendMessageInFloat("measuring",currentValue);  
-      previousMilis = millis();
-      isStableReading = false;
+      lastReconnectAttempt = now;
+      // Attempt to reconnect
+      if (reconnect()) {
+        lastReconnectAttempt = 0;
+      }
     }
-    if((millis() - previousMilis) >= 1000)
+  } 
+  else
+  {
+    client.loop();
+    if(!digitalRead(WATER_LEVEL))
     {
+      float currentValue = getWeight();
+      if(abs(currentValue - previousValue) > 1.0)
+      {
+        previousValue = currentValue;
+        sendMessageInFloat("measuring",currentValue);  
+        previousMilis = millis();
+        isStableReading = false;
+      }
+      if((millis() - previousMilis) >= 1000)
+      {
         if(!isStableReading)
         {
           Serial.print("Glass Weight:");
@@ -439,23 +463,24 @@ void loop()
           previousValue = currentValue;
           sendMessageInFloat("glass",currentValue);
         }
+      }
+      if(!isWaterOK) 
+      {
+        sendMessage("/water/1");
+        isWaterOK = true;
+      }
     }
-    if(!isWaterOK) 
+    else
     {
-      sendMessage("/water/1");
-      isWaterOK = true;
+      isWaterOK = false;
+      sendMessage("/water/0");
+      delay(2000);
     }
-  }
-  else
-  {
-    isWaterOK = false;
-    sendMessage("/water/0");
-    delay(2000);
-  }
   
-
-   if (LoadCell.getTareStatus() == true) {
-    Serial.println("Tare complete");
-    client.publish(topic,"/tare/done");
+    if (LoadCell.getTareStatus() == true) 
+    {
+      Serial.println("Tare complete");
+      client.publish(topic,"/tare/done");
+    }
   }
 }
