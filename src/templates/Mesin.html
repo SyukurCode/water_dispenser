@@ -209,7 +209,7 @@
 			options: {
 				fontSize: "30px",
 				drawPercentageSign: true,
-				drawBubbles: false,
+				drawBubbles: true,
 				size: 300,
 				borderWidth: 19,
 				backgroundColor: "#e2e2e2",
@@ -219,14 +219,14 @@
 					angularSpeed: 30,
 					maxAmplitude: 5,
 					frequency: 30,
-					horizontalSpeed: -20
+					horizontalSpeed: -200
 				},
 				backgroundFluidLayer: {
 					fillStyle: "#4F8FC6",
 					angularSpeed: 100,
 					maxAmplitude: 3,
 					frequency: 22,
-					horizontalSpeed: 20
+					horizontalSpeed: 200
 				}	
 			}
 		});
@@ -447,11 +447,11 @@
         });
 		
 		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
-
-		}
-		else
-		{
-
+			const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+			if(isPortrait)
+			{
+				document.getElementById("display").style.transform = "rotate(90deg)"
+			}
 		}
 		
 </script>
