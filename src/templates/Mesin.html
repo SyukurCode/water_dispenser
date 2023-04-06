@@ -449,13 +449,11 @@
 				document.getElementById("customVolume").disabled = true;
         });
 		document.getElementById("btnUP").addEventListener("click", function (event) {
-			document.getElementById("customVolume").disabled = false;
 		    var currvalue = parseInt(document.getElementById("customVolume").value);
 			if(currvalue <= 2000)
 				document.getElementById("customVolume").value = currvalue + 10; 
         });
 		document.getElementById("btnDOWN").addEventListener("click", function (event) {
-			document.getElementById("customVolume").disabled = false;
 		    var currvalue = parseInt(document.getElementById("customVolume").value);
 			if(currvalue >= 200)
 				document.getElementById("customVolume").value = currvalue - 10; 
