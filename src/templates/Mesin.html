@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
 	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="/static/js/js-fluid-meter.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<style>
 		body {
   			background: gray;
@@ -92,6 +93,7 @@
 		.text-show {
 			margin: 0 auto;
 			font-size: 18px;
+			text-align: left;
 		}
 
 	</style>
@@ -149,7 +151,8 @@
 				<div class="row p-1 form-check">
 				  <label class="form-check-label" for="flexRadioDefault5">
 				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="200" onclick="volumeSet(this.value)" disabled>
-						<input class="text-show" type="number" min="200" max="1000" value="200" style="max-width: 50px" step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
+						<input class="text-show" type="number" min="200" max="2500" value="200"  step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
+						<button id="btnUP"><i class='fa fa-chevron-circle-up'></i></button><button id="btnDOWN"><i class='fa fa-chevron-circle-down'></i></button>
 				  </label>
 				</div>
 			</div>
@@ -444,6 +447,18 @@
 				document.getElementById("customVolume").disabled = false;
 			else
 				document.getElementById("customVolume").disabled = true;
+        });
+		document.getElementById("btnUP").addEventListener("click", function (event) {
+			document.getElementById("customVolume").disabled = false;
+		    var currvalue = parseInt(document.getElementById("customVolume").value);
+			if(currvalue <= 2000)
+				document.getElementById("customVolume").value = currvalue + 10; 
+        });
+		document.getElementById("btnDOWN").addEventListener("click", function (event) {
+			document.getElementById("customVolume").disabled = false;
+		    var currvalue = parseInt(document.getElementById("customVolume").value);
+			if(currvalue >= 200)
+				document.getElementById("customVolume").value = currvalue - 10; 
         });
 		
 		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
