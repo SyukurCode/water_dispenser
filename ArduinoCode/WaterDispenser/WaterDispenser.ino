@@ -20,8 +20,10 @@ unsigned long t = 0;
 float previousValue = 0;
 unsigned long previousMilis = 0;
 boolean isStableReading = false;
+boolean isReadyToDispense = false;
 boolean isWaterOK = false;
 boolean isStop = false;
+boolean inUse = false;
 long lastReconnectAttempt = 0;
 
 //mqtt
@@ -92,8 +94,12 @@ void setup()
     }
   }
 
+  //initial checking 
   client.publish(topic, "/status/online");
-  waterCheck();
+  isWaterOK = waterCheck();
+  if(isWaterOK) sendMessage("/water/1");
+  if(!isWaterOK) sendMessage("/water/0");
+    
   client.subscribe("waterdispenser");
 }
 
@@ -124,7 +130,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(command == "status")
   {
     sendMessage("/status/online");
-    waterCheck();
+    isWaterOK = waterCheck();
+    if(isWaterOK)
+      sendMessage("/water/1");
+    else
+      sendMessage("/water/0");
   }
   if(command == "normal")
   {
@@ -141,23 +151,33 @@ void callback(char* topic, byte* payload, unsigned int length) {
     float fValue = value.toFloat();
     dispenseWarm(fValue,12.0);
   }
+  if(command == "check")
+  {
+    if(isReadyToDispense && isWaterOK && !inUse)
+      client.publish("alexa","/status/ready");
+    else
+      if(!isReadyToDispense)
+        client.publish("alexa","/status/noglass");
+      if(!isWaterOK)
+        client.publish("alexa","/status/nowater");
+      if(inUse)
+        client.publish("alexa","/status/inuse");
+  }
 }
 bool waterCheck()
 {
-    if(digitalRead(WATER_LEVEL)) 
-    {
-      sendMessage("/water/0");
-      return false;
-    }
     if(!digitalRead(WATER_LEVEL)) 
     {
-      sendMessage("/water/1");
+      //sendMessage("/water/1");
       return true;
     }
+    //sendMessage("/water/0");
+    return false;
 }
 void dispenseWarm(float volume,float offset)
 {
- volume = volume - offset;
+  inUse = true;
+  volume = volume - offset;
   bool isComplete = false;
   int percent,prevPercent = 0;
   char msg[30];
@@ -227,7 +247,8 @@ void dispenseWarm(float volume,float offset)
 }
 void dispenseHot(float volume,float offset)
 {
- volume = volume - offset;
+  inUse = true;
+  volume = volume - offset;
   bool isComplete = false;
   int percent,prevPercent = 0;
   char msg[30];
@@ -296,6 +317,7 @@ void dispenseHot(float volume,float offset)
 }
 void dispenseNormal(float volume, float offset)
 {
+  inUse = true;
   volume = volume - offset;
   bool isComplete = false;
   int percent,prevPercent = 0;
@@ -457,11 +479,14 @@ void loop()
       {
         if(!isStableReading)
         {
+          isReadyToDispense = false;
           Serial.print("Glass Weight:");
           Serial.println(currentValue);
           isStableReading = true;
           previousValue = currentValue;
           sendMessageInFloat("glass",currentValue);
+          if(currentValue >= 5.0) isReadyToDispense = true;
+          inUse = false;
         }
       }
       if(!isWaterOK) 
