@@ -150,9 +150,9 @@
 				
 				<div class="row p-1 form-check">
 				  <label class="form-check-label" for="flexRadioDefault5">
-				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="200" onclick="volumeSet(this.value)" disabled>
-						<input class="text-show" type="number" min="200" max="2500" value="200"  step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
-						<button id="btnUP"><i class='fa fa-chevron-circle-up'></i></button><button id="btnDOWN"><i class='fa fa-chevron-circle-down'></i></button>
+				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="200" onclick="volumeSet(customVolume.value)" disabled>
+						<input class="text-show" type="number" min="100" max="2500" value="200"  step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
+						<button id="btnUP" disabled><i class='fa fa-chevron-circle-up'></i></button><button id="btnDOWN" disabled><i class='fa fa-chevron-circle-down'></i></button>
 				  </label>
 				</div>
 			</div>
@@ -404,6 +404,8 @@
 			document.getElementById("flexRadioDefault3").disabled = true;
 			document.getElementById("flexRadioDefault4").disabled = true;
 			document.getElementById("flexRadioDefault5").disabled = true;
+			document.getElementById("btnUP").disabled = true;
+			document.getElementById("btnDOWN").disabled = true;
 		}	
 		function enabledAll()
 		{
@@ -415,11 +417,14 @@
 			document.getElementById("flexRadioDefault3").disabled = false;
 			document.getElementById("flexRadioDefault4").disabled = false;
 			document.getElementById("flexRadioDefault5").disabled = false;
+			document.getElementById("btnUP").disabled = false;
+			document.getElementById("btnDOWN").disabled = false;
 			ledGreen("on");
 			document.getElementById("btnStop").disabled = true;
 		}
 		function volumeSet(ml)
 		{
+		    console.log(ml);
 			capacityRequest = ml;
 			if(document.getElementById("flexRadioDefault5").checked)
 				document.getElementById("customVolume").disabled = false;
@@ -427,16 +432,49 @@
 				document.getElementById("customVolume").disabled = true;
 		}
 		document.getElementById("btnNormal").addEventListener("click", function (event) {
-            sendMessage("waterdispenser","/normal/" + capacityRequest);
-			disabledAll();
+			if(capacityRequest > 2500)
+			{
+				alert("Hello! limit 2500ml je ok!!!");
+		    }
+			else if(capacityRequest < 100)
+			{
+				alert("Terlalu sikit volume minima yang dibenarkan 100ml");
+		    }
+			else
+            {
+				sendMessage("waterdispenser","/normal/" + capacityRequest);
+				disabledAll();
+			}
         });
 		document.getElementById("btnWarm").addEventListener("click", function (event) {
-            sendMessage("waterdispenser","/warm/" + capacityRequest);
-			disabledAll();
+			if(capacityRequest > 2500)
+			{
+				alert("Hello! limit 2500ml je ok!!!");
+		    }
+			else if(capacityRequest < 100)
+			{
+				alert("Terlalu sikit volume minima yang dibenarkan 100ml");
+		    }
+			else
+			{
+				sendMessage("waterdispenser","/warm/" + capacityRequest);
+				disabledAll();
+			}
         });
 		document.getElementById("btnHot").addEventListener("click", function (event) {
-            sendMessage("waterdispenser","/hot/" + capacityRequest);
-			disabledAll();
+			if(capacityRequest > 2500)
+			{
+				alert("Hello! limit 2500ml je ok!!!");
+		    }
+			else if(capacityRequest < 100)
+			{
+				alert("Terlalu sikit volume minima yang dibenarkan 100ml");
+		    }
+			else
+			{
+				sendMessage("waterdispenser","/hot/" + capacityRequest);
+				disabledAll();
+			}
         });
 		document.getElementById("btnStop").addEventListener("click", function (event) {
             sendMessage("waterdispenser","/stop/0");
@@ -451,12 +489,18 @@
 		document.getElementById("btnUP").addEventListener("click", function (event) {
 		    var currvalue = parseInt(document.getElementById("customVolume").value);
 			if(currvalue <= 2000)
-				document.getElementById("customVolume").value = currvalue + 10; 
+			{
+				document.getElementById("customVolume").value = currvalue + 100; 
+				volumeSet(currvalue + 100);
+			}
         });
 		document.getElementById("btnDOWN").addEventListener("click", function (event) {
 		    var currvalue = parseInt(document.getElementById("customVolume").value);
-			if(currvalue >= 200)
-				document.getElementById("customVolume").value = currvalue - 10; 
+			if(currvalue > 100)
+			{
+				document.getElementById("customVolume").value = currvalue - 100; 
+				volumeSet(currvalue - 100);
+			}
         });
 		
 		if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
