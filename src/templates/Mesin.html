@@ -151,7 +151,7 @@
 				<div class="row p-1 form-check">
 				  <label class="form-check-label" for="flexRadioDefault5">
 				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="200" onclick="volumeSet(customVolume.value)" disabled>
-						<input class="text-show" type="number" min="100" max="2500" value="200"  step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
+						<input class="text-show" type="number" min="100" max="2500" value="1300"  step="10" id="customVolume" onchange="volumeSet(this.value)" disabled> </input>ml
 						<button id="btnUP" disabled><i class='fa fa-chevron-circle-up'></i></button><button id="btnDOWN" disabled><i class='fa fa-chevron-circle-down'></i></button>
 				  </label>
 				</div>
@@ -267,6 +267,7 @@
 			console.log("New message: " + message.payloadString);
 			let text = message.payloadString;
 			const myArray = text.split("/");
+			let arraySize = myArray.length;
 			console.log("Event: " + myArray[1]);
 			console.log("Value: " + myArray[2]);
 			
