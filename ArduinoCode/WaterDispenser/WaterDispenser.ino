@@ -182,6 +182,8 @@ void dispenseWarm(float volume,float offset)
   int percent,prevPercent = 0;
   char msg[30];
   float glassWeight = previousValue;
+  String message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume);
+  
   pumpON(50);
   heaterON(true);
   previousMilis = millis();
@@ -193,10 +195,12 @@ void dispenseWarm(float volume,float offset)
       if(currentValue >= glassWeight) 
       {
         percent = map(currentValue - glassWeight,0,volume,0,100);
-        snprintf (msg, 13, "/filling/%ld", percent);
+        //snprintf (msg, 13, "/filling/%ld", percent);
+        message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume);
         if(abs(previousValue-currentValue) > 1.0 )
         {
           previousValue = currentValue;
+          message.toCharArray(msg,message.length());
           client.publish(topic,msg);
         }
       }
@@ -251,8 +255,10 @@ void dispenseHot(float volume,float offset)
   volume = volume - offset;
   bool isComplete = false;
   int percent,prevPercent = 0;
-  char msg[30];
+  char msg[50];
   float glassWeight = previousValue;
+  String message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume);
+  
   pumpON(45);
   heaterON(true);
   previousMilis = millis();
@@ -264,10 +270,12 @@ void dispenseHot(float volume,float offset)
       if(currentValue >= glassWeight) 
       {
         percent = map(currentValue - glassWeight,0,volume,0,100);
-        snprintf (msg, 13, "/filling/%ld", percent);
+        //snprintf (msg, 13, "/filling/%ld", percent);
+        message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume);
         if(abs(previousValue-currentValue) > 1.0 )
         {
           previousValue = currentValue;
+          message.toCharArray(msg,message.length());
           client.publish(topic,msg);
         }
       }
@@ -321,8 +329,9 @@ void dispenseNormal(float volume, float offset)
   volume = volume - offset;
   bool isComplete = false;
   int percent,prevPercent = 0;
-  char msg[30];
+  char msg[50];
   float glassWeight = previousValue;
+  String message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
   
   Serial.print("capacity request :");
   Serial.print(volume,0);
@@ -339,10 +348,12 @@ void dispenseNormal(float volume, float offset)
       if(currentValue >= glassWeight) 
       {
         percent = map(currentValue - glassWeight,0,volume,0,100);
-        snprintf (msg, 13, "/filling/%ld", percent);
+        //snprintf (msg, 13, "/filling/%ld", percent);
+        message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
         if(abs(previousValue-currentValue) > 1.0 )
         {
           previousValue = currentValue;
+          message.toCharArray(msg,message.length());
           client.publish(topic,msg);
         }
       }

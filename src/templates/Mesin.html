@@ -180,7 +180,9 @@
 			</div>
 			<div class="col-6 text-center" style="padding-top:5%">
 				<div id="fluid-meter-3"></div>
-				<label>capacity :<strong id="capacity"> 0ml</strong></label>
+				<label>Type :<strong id="type"> </strong></label>
+				<label>Capacity :<strong id="capacity"> 0ml</strong></label>
+				<label>Request :<strong id="capacity"> 0ml</strong></label>
 			</div>
 		</div>
     </div>
@@ -292,13 +294,25 @@
 			if(myArray[1] == "filling")
 			{
 				ledYellow("on");
+				let volumereq = 0;
+				let capacity = 0;
+				let offset = 12.0;
 				var percent = myArray[2];
+				if(myArray.length > 2)
+				{
+					volumereq = parseFloat(myArray[6]) + 12.0;
+					capacity = percent/100 * volumereq;
+					document.getElementById("type").innerHTML = myArray[4];
+					document.getElementById("Request").innerHTML = myArray[6] + "ml";;
+				}
+				else
+				{
+					capacity = percent/100 * capacityRequest
+				}
 				if(percent > -1 && percent < 101.0)
 				{
 					fm3.setPercentage(percent);
 					disabledAll();
-					let  capacity = 0;
-					capacity = percent/100 * capacityRequest
 					document.getElementById("capacity").innerHTML = capacity.toString() + "ml";
 					document.getElementById("btnStop").disabled = false;
 				}
