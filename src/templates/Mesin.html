@@ -127,6 +127,7 @@
 				  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault1" onclick="volumeSet(this.value)" value="125" disabled>
 					<span class="text-show" id="showVolume">1/2 Glass</span>
 				  </label>
+				  <button>1/2 Glass</button>
 				</div>
 				
 				<div class="row p-1 form-check">
@@ -178,11 +179,11 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-6 text-center" style="padding-top:5%">
+			<div class="col-6 text-center" style="padding-top:0%">
+				<label>Request :<strong id="request"> 0ml</strong></label> <br>
+				<label>Type :<strong id="type"> unknown</strong></label> <br>
 				<div id="fluid-meter-3"></div>
-				<label>Type :<strong id="type"> </strong></label>
-				<label>Capacity :<strong id="capacity"> 0ml</strong></label>
-				<label>Request :<strong id="capacity"> 0ml</strong></label>
+				<label>Capacity :<strong id="capacity"> 0ml</strong></label> <br>
 			</div>
 		</div>
     </div>
@@ -202,7 +203,7 @@
 	});
     //led
 	 var capacityRequest = 250;
-	 var client = new Paho.MQTT.Client("192.168.31.88", Number(9001), "web");
+	 var client = new Paho.MQTT.Client("192.168.0.88", Number(9001), "web");
 	 var glassWeight = 0;
 	 
 	 
@@ -272,6 +273,12 @@
 			let arraySize = myArray.length;
 			console.log("Event: " + myArray[1]);
 			console.log("Value: " + myArray[2]);
+			if(arraySize > 3) 
+			{
+				console.log("Type: " + myArray[4]);
+				console.log("Request: " + myArray[6]);				
+			}
+			console.log("Len: " + arraySize);
 			
 			if(myArray[1] == "status")
 			{
@@ -300,14 +307,10 @@
 				var percent = myArray[2];
 				if(myArray.length > 2)
 				{
-					volumereq = parseFloat(myArray[6]) + 12.0;
+					volumereq = parseFloat(myArray[6]) + offset;
 					capacity = percent/100 * volumereq;
 					document.getElementById("type").innerHTML = myArray[4];
-					document.getElementById("Request").innerHTML = myArray[6] + "ml";;
-				}
-				else
-				{
-					capacity = percent/100 * capacityRequest
+					document.getElementById("request").innerHTML = volumereq.toString() + "ml";;
 				}
 				if(percent > -1 && percent < 101.0)
 				{
