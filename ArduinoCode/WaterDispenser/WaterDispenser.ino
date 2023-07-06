@@ -455,6 +455,7 @@ void pumpON(int percentSpeed)
   analogWrite(PUMP,pwmSpeed);
 }
 boolean reconnect() {
+  client.setKeepAlive(MQTT_KEEPALIVE);
   if (client.connect("ESP8266Client", mqttUser, mqttPassword)) 
   {
     client.publish(topic, "/status/online");
