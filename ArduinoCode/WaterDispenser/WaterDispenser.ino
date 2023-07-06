@@ -11,6 +11,7 @@
 #define WATER_LEVEL 13
 #define HEATER 5    //d1
 #define PUMP 4      //d2 //MUST PWM
+#define MQTT_KEEPALIVE 1000 // keep trying various numbers
 
 //HX711 constructor:
 HX711_ADC LoadCell(HX711_dout, HX711_sck);
@@ -27,7 +28,7 @@ boolean inUse = false;
 long lastReconnectAttempt = 0;
 
 //mqtt
-const char* mqttServer = "192.168.0.88";
+const char* mqttServer = "myqs-bunker.ddns.net";
 const int mqttPort = 1883;
 const char* mqttUser = "syukur";
 const char* mqttPassword = "syukur123***";
@@ -47,6 +48,8 @@ void setup()
   digitalWrite(HEATER,LOW);
   
   WiFiManager wm;
+  String WIFI_HOSTNAME = "Water_Dispenser";
+  WiFi.setHostname(WIFI_HOSTNAME.c_str()); //define hostname
 
   bool res;
   res = wm.autoConnect("Water_Dispenser"); 
@@ -76,6 +79,7 @@ void setup()
   }
 
   //MQTT
+  client.setKeepAlive(MQTT_KEEPALIVE);
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);
 
