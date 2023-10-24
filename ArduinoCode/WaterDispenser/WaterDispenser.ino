@@ -28,7 +28,7 @@ boolean inUse = false;
 long lastReconnectAttempt = 0;
 
 //mqtt
-const char* mqttServer = "myqs-bunker.ddns.net";
+const char* mqttServer = "192.168.0.88";
 const int mqttPort = 1883;
 const char* mqttUser = "syukur";
 const char* mqttPassword = "syukur123***";
