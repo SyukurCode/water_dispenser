@@ -20,7 +20,7 @@ function FluidMeter() {
     fontSize: "70px",
     fontFamily: "Arial",
     fontFillStyle: "white",
-    size: 300,
+    size: 200,
     borderWidth: 25,
     backgroundColor: "#e2e2e2",
     foregroundColor: "#fafafa"
