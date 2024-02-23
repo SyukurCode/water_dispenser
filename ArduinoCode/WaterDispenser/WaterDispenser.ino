@@ -158,8 +158,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   if (command == "check")
   {
-    if (isReadyToDispense && isWaterOK && !inUse)
+    if (isReadyToDispense && isWaterOK && !inUse){
+      client.publish(topic, "/status/ready");
       client.publish("alexa", "/status/ready");
+    }
     else if (!isReadyToDispense)
       client.publish("alexa", "/status/noglass");
     if (!isWaterOK)
@@ -198,37 +200,56 @@ bool waterCheck()
 }
 void dispenseWarm(float volume, float offset)
 {
+  isStop = false;
   inUse = true;
   volume = volume - offset;
+  float dispenseSpeed = 0.0;
   bool isComplete = false;
   int percent, prevPercent = 0;
-  char msg[30];
+  char msg[50];
   float glassWeight = previousValue;
   String message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume);
 
   pumpON(50);
   heaterON(true);
   previousMilis = millis();
+  long prevTime = millis();
+  long monitorTime = millis();
   while (!isComplete)
   {
     client.loop();
     float currentValue = getWeight();
-
-    if (currentValue >= glassWeight)
-    {
-      percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-      //snprintf (msg, 13, "/filling/%ld", percent);
-      message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume);
-      if (abs(previousValue - currentValue) > 1.0 )
+    //fillter valid value
+    if(currentValue != -10000000.0){
+      if (currentValue >= glassWeight)
       {
-        previousValue = currentValue;
-        message.toCharArray(msg, message.length());
-        client.publish(topic, msg);
+        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
+        if ((millis() - prevTime) > 100 )
+        {
+          float time_taken = (millis() - prevTime)/1000.0;
+          int dispenseVolume = abs(previousValue - currentValue);
+          dispenseSpeed = dispenseVolume/time_taken;
+          message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
+          prevTime = millis();
+          previousValue = currentValue;
+          message.toCharArray(msg, message.length());
+          client.publish(topic, msg);
+        }
+      }
+      if((previousValue - currentValue) >= 50.0) {
+         isStop = true;
+      }
+      //monitor flow
+      if(millis() - monitorTime > 2000){
+          if(dispenseSpeed < 1.0){
+            isStop = true;
+          }
+          monitorTime = millis();
       }
     }
-
-    //jika glass diangkat
-    if ((previousValue - currentValue) >= 50.0  || isStop)
+    
+    //jika glass diangkat atau tiada air
+    if (isStop || digitalRead(WATER_LEVEL))
     {
       heaterON(false);
       delay(2000);
@@ -236,9 +257,11 @@ void dispenseWarm(float volume, float offset)
       isComplete = true;
       isStop = false;
       Serial.println("Stop");
+      client.publish(topic, "/status/stop");
       break;
     }
 
+    //prepair to stop
     if (abs((volume + glassWeight) - currentValue) <= 50.0)
     {
       heaterON(false);
@@ -251,7 +274,7 @@ void dispenseWarm(float volume, float offset)
         pumpON(80);
       }
     }
-
+    //finish
     if (currentValue >= volume + glassWeight)
     {
       pumpON(0);
@@ -273,8 +296,10 @@ void dispenseWarm(float volume, float offset)
 }
 void dispenseHot(float volume, float offset)
 {
+  isStop = false;
   inUse = true;
   volume = volume - offset;
+  float dispenseSpeed = 0.0;
   bool isComplete = false;
   int percent, prevPercent = 0;
   char msg[50];
@@ -284,26 +309,42 @@ void dispenseHot(float volume, float offset)
   pumpON(45);
   heaterON(true);
   previousMilis = millis();
+  long prevTime = millis();
+  long monitorTime = millis();
   while (!isComplete)
   {
     client.loop();
     float currentValue = getWeight();
-
-    if (currentValue >= glassWeight)
-    {
-      percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-      //snprintf (msg, 13, "/filling/%ld", percent);
-      message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume);
-      if (abs(previousValue - currentValue) > 1.0 )
+    if(currentValue != -10000000.0){
+      if (currentValue >= glassWeight)
       {
-        previousValue = currentValue;
-        message.toCharArray(msg, message.length());
-        client.publish(topic, msg);
+        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
+        if ((millis() - prevTime) > 100 )
+        {
+          float time_taken = (millis() - prevTime)/1000.0;
+          int dispenseVolume = abs(previousValue - currentValue);
+          dispenseSpeed = dispenseVolume/time_taken;
+          message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
+          prevTime = millis();
+          previousValue = currentValue;
+          message.toCharArray(msg, message.length());
+          client.publish(topic, msg);
+        }
+      }
+      if((previousValue - currentValue) >= 50.0) {
+         isStop = true;
+      }
+      //monitor flow
+      if(millis() - monitorTime > 2000){
+          if(dispenseSpeed < 1.0){
+            isStop = true;
+          }
+          monitorTime = millis();
       }
     }
 
-    //jika glass diangkat
-    if ((previousValue - currentValue) >= 50.0  || isStop || digitalRead(WATER_LEVEL))
+    //jika glass diangkat atau tiada air
+    if (isStop || digitalRead(WATER_LEVEL))
     {
       heaterON(false);
       delay(2000);
@@ -311,9 +352,11 @@ void dispenseHot(float volume, float offset)
       isComplete = true;
       isStop = false;
       Serial.println("Stop");
+      client.publish(topic, "/status/stop");
       break;
     }
 
+    //prepair to stop
     if ((abs(volume + glassWeight) - currentValue) <= 50.0)
     {
       heaterON(false);
@@ -326,7 +369,7 @@ void dispenseHot(float volume, float offset)
         pumpON(55);
       }
     }
-
+    //finish
     if (currentValue >= volume + glassWeight)
     {
       pumpON(0);
@@ -347,8 +390,10 @@ void dispenseHot(float volume, float offset)
 }
 void dispenseNormal(float volume, float offset)
 {
+  isStop = false;
   inUse = true;
   volume = volume - offset;
+  float dispenseSpeed = 0.0;
   bool isComplete = false;
   int percent, prevPercent = 0;
   char msg[50];
@@ -362,39 +407,60 @@ void dispenseNormal(float volume, float offset)
   Serial.print(glassWeight);
   Serial.println("g");
   pumpON(50);
+  previousMilis = millis();
+  long prevTime = millis();
+  long monitorTime = millis();
   while (!isComplete)
   {
     client.loop();
     float currentValue = getWeight();
-
-    if (currentValue >= glassWeight)
-    {
-      percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-      //snprintf (msg, 13, "/filling/%ld", percent);
-      message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
-      if (abs(previousValue - currentValue) > 1.0 )
+    if(currentValue != -10000000.0){
+      if (currentValue >= glassWeight)
       {
-        previousValue = currentValue;
-        message.toCharArray(msg, message.length());
-        client.publish(topic, msg);
+        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
+        //snprintf (msg, 13, "/filling/%ld", percent);
+        message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
+        if ((millis() - prevTime) > 100 )
+        {
+          float time_taken = (millis() - prevTime)/1000.0;
+          int dispenseVolume = abs(previousValue - currentValue);
+          dispenseSpeed = dispenseVolume/time_taken;
+          message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
+          prevTime = millis();
+          previousValue = currentValue;
+          message.toCharArray(msg, message.length());
+          client.publish(topic, msg);
+        }
+      }
+      if((previousValue - currentValue) >= 50.0) {
+         isStop = true;
+      }
+      //monitor flow
+      if(millis() - monitorTime > 2000){
+          if(dispenseSpeed < 1.0){
+            isStop = true;
+          }
+          monitorTime = millis();
       }
     }
 
-    //jika glass diangkat
-    if ((previousValue - currentValue) >= 50.0 || isStop || digitalRead(WATER_LEVEL))
+    //jika glass diangkat atau tiada air
+    if (isStop || digitalRead(WATER_LEVEL))
     {
       pumpON(0);
       isComplete = true;
       isStop = false;
       Serial.println("Stop");
+      client.publish(topic, "/status/stop");
       break;
     }
-
+    
+    //prepair to stop
     if (abs((volume + glassWeight) - currentValue) <= 10.0)
     {
       pumpON(30);
     }
-
+    //finish
     if (currentValue >= volume + glassWeight)
     {
       pumpON(0);
@@ -441,7 +507,7 @@ float getWeight()
       return i;
     }
   }
-  return 0.0;
+  return -10000000.0;
 }
 void sendMessage(char* mesg)
 {
@@ -452,15 +518,9 @@ void sendMessage(char* mesg)
 }
 void sendMessageInFloat(String message, float value)
 { 
-  String mesg = "/" + message + "/%.2f";
-  char msgTemp[100];
+  String mesg = "/" + message + "/" + String(value);
   char msg[30];
-  for (int i = 0; i < mesg.length(); i++)
-  {
-    msgTemp[i] = mesg[i];
-  }
-  int Len = mesg.length() + 2;
-  snprintf (msg, Len, msgTemp , value);
+  mesg.toCharArray(msg, mesg.length());
   client.publish(topic, msg);
 }
 void heaterON(bool isON)
@@ -518,28 +578,33 @@ void loop()
     else
     {
       client.loop();
+      //if waterlevel ok
       if (!digitalRead(WATER_LEVEL))
       {
         float currentValue = getWeight();
-        if (abs(currentValue - previousValue) > 1.0)
-        {
-          previousValue = currentValue;
-          sendMessageInFloat("measuring", currentValue);
-          previousMilis = millis();
-          isStableReading = false;
-        }
-        if ((millis() - previousMilis) >= 1000)
-        {
-          if (!isStableReading)
+        //filter valid value
+        if(currentValue != -10000000.0){
+          if (abs(currentValue - previousValue) > 1.0)
           {
-            isReadyToDispense = false;
-            Serial.print("Glass Weight:");
-            Serial.println(currentValue);
-            isStableReading = true;
             previousValue = currentValue;
-            sendMessageInFloat("glass", currentValue);
-            if (currentValue >= 5.0) isReadyToDispense = true;
-            inUse = false;
+            sendMessageInFloat("measuring", currentValue);
+            previousMilis = millis();
+            isStableReading = false;
+            delay(300);
+          }
+          if ((millis() - previousMilis) >= 1000)
+          {
+            if (!isStableReading)
+            {
+              isReadyToDispense = false;
+              Serial.print("Glass Weight:");
+              Serial.println(currentValue);
+              isStableReading = true;
+              previousValue = currentValue;
+              sendMessageInFloat("glass", currentValue);
+              if (currentValue >= 5.0) isReadyToDispense = true;
+              inUse = false;
+            }
           }
         }
         if (!isWaterOK)

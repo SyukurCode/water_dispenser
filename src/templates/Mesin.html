@@ -126,9 +126,9 @@
 		</div>
 		<hr>
 		<div class="row text-center">
-				<label>Request :<strong id="request"> 0ml</strong></label> 
+				<label>Flow :<strong id="dispenseSpeed"> 0</strong> ml/s</label> 
 				<label>Type :<strong id="type"> unknown</strong></label>
-				<label>Capacity :<strong id="capacity"> 0ml</strong></label>
+				<label>Capacity :<strong id="capacity"> 0</strong>/<strong id="request">0</strong> ml</label>
 				<div id="fluid-meter-3"></div>
 				<a class="btn btn-outline-primary" id="btnReset">Reset</a>
 		</div>
@@ -284,6 +284,12 @@
 				if(myArray[2] == "online")
 				{
 					ledRed("on");
+					sendMessage("waterdispenser","/check/0");
+				}
+				if(myArray[2] == "stop")
+				{
+					ledYellow("off");
+					sendMessage("waterdispenser","/check/0");
 				}
 				document.getElementById("btnReset").disabled = false;
 			}
@@ -308,17 +314,19 @@
 				if(myArray.length > 2)
 				{
 					volumereq = parseFloat(myArray[6]) + offset;
+					dispenseSpeed = parseFloat(myArray[8]);
 					capacity = percent/100 * volumereq;
 					document.getElementById("type").innerHTML = myArray[4];
-					document.getElementById("request").innerHTML = volumereq.toString() + "ml";;
+					document.getElementById("request").innerHTML = volumereq.toString();
 				}
 				if(percent > -1 && percent < 101.0)
 				{
 					fm3.setPercentage(percent);
 					disabledAll();
-					document.getElementById("capacity").innerHTML = capacity.toString() + "ml";
+					document.getElementById("capacity").innerHTML = capacity.toString();
 					document.getElementById("btnStop").disabled = false;
 				}
+				document.getElementById("dispenseSpeed").innerHTML = dispenseSpeed.toString();
 				document.getElementById("btnReset").disabled = true;
 			}
 			if(myArray[1] == "measuring")
@@ -340,7 +348,8 @@
 				if(glassWeight < 5.0)
 				{
 					fm3.setPercentage(0);
-					document.getElementById("capacity").innerHTML = "0ml";
+					document.getElementById("capacity").innerHTML = "0";
+					document.getElementById("dispenseSpeed").innerHTML = "0";
 				}
 				document.getElementById("btnReset").disabled = false;
 			}
