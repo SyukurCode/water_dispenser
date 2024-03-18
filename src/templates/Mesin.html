@@ -129,8 +129,10 @@
 				<label>Flow :<strong id="dispenseSpeed"> 0</strong> ml/s</label> 
 				<label>Type :<strong id="type"> unknown</strong></label>
 				<label>Capacity :<strong id="capacity"> 0</strong>/<strong id="request">0</strong> ml</label>
+				<div class="text-center">
+                    <a class="btn btn-outline-primary btn-circle" id="btnReset" style="width:30%; text-align: center">RESET</a>
+                </div>
 				<div id="fluid-meter-3"></div>
-				<a class="btn btn-outline-primary" id="btnReset">Reset</a>
 		</div>
 		</br>
 		<div class="row">
@@ -200,7 +202,7 @@
 	});
     //led
 	 var capacityRequest = 250;
-	 var client = new Paho.MQTT.Client("192.168.0.88", Number(9001), clientid);
+	 var client = new Paho.MQTT.Client("myqs-bunker.ddns.net", Number(80), clientid);
 	 var glassWeight = 0;
 	 
 	 

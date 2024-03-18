@@ -159,7 +159,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (command == "check")
   {
     if (isReadyToDispense && isWaterOK && !inUse){
-      client.publish(topic, "/status/ready");
       client.publish("alexa", "/status/ready");
     }
     else if (!isReadyToDispense)
