@@ -20,9 +20,9 @@ fm3.init({
 		drawPercentageSign: true,
 		drawBubbles: true,
 		size: 200,
-		borderWidth: 19,
+		borderWidth: 5,
 		backgroundColor: "#e2e2e2",
-		foregroundColor: "#fafafa",
+		foregroundColor: "#41D2E9",
 		foregroundFluidLayer: {
 			fillStyle: "#16E1FF",
 			angularSpeed: 30,
@@ -251,14 +251,21 @@ function enabledAll()
 	ledGreen("on");
 	document.getElementById("btnStop").disabled = true;
 }
-function volumeSet(ml)
+function volumeSet(ml,active)
 {
 	console.log(ml);
+	console.log(active);
 	capacityRequest = ml;
-	if(document.getElementById("flexRadioDefault5").checked)
+/* 	if(document.getElementById("flexRadioDefault5").checked)
 		document.getElementById("customVolume").disabled = false;
 	else
-		document.getElementById("customVolume").disabled = true;
+		document.getElementById("customVolume").disabled = true; */
+	
+	for(let i=1;i<6;i++){
+		document.getElementById("volume-" + i ).classList.remove("volume-active");
+	}
+	
+	document.getElementById(active).classList.add("volume-active");
 }
 document.getElementById("btnNormal").addEventListener("click", function (event) {
 	if(capacityRequest > 2500)
@@ -318,10 +325,10 @@ document.getElementById("flexRadioDefault5").addEventListener("click", function 
 	else
 		document.getElementById("customVolume").disabled = true;
 });
-if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+/* if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
 	const isPortrait = window.matchMedia('(orientation: portrait)').matches;
 	if(isPortrait)
 	{
-		document.getElementById("display").style.transform = "rotate(90deg)"
-	}
-}
+		document.getElementById("screen").style.transform = "rotate(90deg)";
+	} 
+}*/

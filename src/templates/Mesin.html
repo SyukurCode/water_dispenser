@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -12,8 +11,10 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<style>
 		body {
+<!-- 			height: 100%;
+ -->			margin: 0;
   			background: gray;
-			padding:3%
+			padding: 0;
 		}
 		input {
 			text-align: center;
@@ -25,20 +26,22 @@
 			text-align: center;
 			<!-- max-width: 800px;
 			max-height: 800px; -->
-			margin: auto;
+			<!-- margin: auto; -->			
 			background: #D0D3D4 ;
-			padding: 4%;
-		}
+			padding: 2%;
+			width: 100%;
+<!-- 			height:100%;
+ -->		}
 		h1 {
 			max-width: 100%;
 			height: auto;
 		}
 		.btn-circle.btn-xl {
 			min-width: 80px;
-			<!-- height: 80px; -->
-			height: auto;
+			height: 80px;
+			<!-- height: auto; -->
 			padding-top: 2px;
-			border-radius: 40px;
+<!-- 			border-radius: 40px;-->
 			font-size: auto;
 			text-align: center;
 		}
@@ -101,12 +104,17 @@
 			border-style: dashed; 
 			background-color: #F2F3F4;
 		}
-
+		.volume-active {
+			background-color: CornflowerBlue;
+		}
+		.font-volume {
+			font-size: 200%;
+		}
 	</style>
 </head>
 <body>
-	<div class="content" controls id="screen">
-		<div class="row p-1">
+	<div class="content" id="screen">
+		<div class="row">
 			<div class="col-3 text-end led-box">
 				<div id="ledStatus" class="led-red"></div>
 				<p>On/Off</p>
@@ -136,52 +144,52 @@
 		</div>
 		</br>
 		<div class="row">
-			<div class="col-3 check-box-show">
+			<div class="col-3 check-box-show" id="volume-1">
 			  <label class="form-check-label" for="flexRadioDefault1">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault1" onclick="volumeSet(this.value)" value="125" disabled>
-				<span class="text-show" id="showVolume">1/2</span>Glass
+			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault1" onclick="volumeSet(this.value,'volume-1')" value="125" disabled>
+				<span class="text-show font-volume" id="showVolume">125</span>ml
 			  </label>
 			</div>
-			<div class="col-3 check-box-show">
+			<div class="col-3 check-box-show volume-active" id="volume-2">
 			  <label class="form-check-label" for="flexRadioDefault2">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault2" onclick="volumeSet(this.value)" value="250" checked disabled>
-				<span class="text-show" id="showVolume">1</span>Glass
+			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault2" onclick="volumeSet(this.value,'volume-2')" value="250" checked disabled>
+				<span class="text-show font-volume" id="showVolume">250</span>ml
 			  </label>
 			</div>
-			<div class="col-3 check-box-show">
+			<div class="col-3 check-box-show" id="volume-3">
 			  <label class="form-check-label" for="flexRadioDefault3">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault3" onclick="volumeSet(this.value)" value="300" disabled>
-					<span class="text-show" id="showVolume">300</span>ml
+			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault3" onclick="volumeSet(this.value,'volume-3')" value="300" disabled>
+					<span class="text-show font-volume" id="showVolume">300</span>ml
 			  </label>
 			</div>
-			<div class="col-3 check-box-show">
+			<div class="col-3 check-box-show" id="volume-4"> 
 			  <label class="form-check-label" for="flexRadioDefault4">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault4" onclick="volumeSet(this.value)" value="500" disabled>
-					<span class="text-show" id="showVolume">500</span>ml
+			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault4" onclick="volumeSet(this.value,'volume-4')" value="500" disabled>
+					<span class="text-show font-volume" id="showVolume" >500</span>ml
 			  </label>
 			</div>
 			
-			<div class="col-12 check-box-show" >
+			<div class="col-12 check-box-show" id="volume-5">
 			  <label class="form-check-label" for="flexRadioDefault5">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="1000" onclick="volumeSet(customVolume.value)" />
-					<span class="text-show" id="custVolume">1000</span>ml
-					<input class="form-range" type="range" min="100" max="2500" value="1000"  step="10" id="customVolume" onchange="volumeSet(this.value)" oninput="var str = document.getElementById('custVolume').innerHTML = this.value" disabled /> 
-			  </label>
+			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="1000" onclick="volumeSet(customVolume.value,'volume-5')" />
+					<span class="text-show font-volume" id="custVolume">1000</span>ml
+<!-- 					<input class="form-range" type="range" min="100" max="2500" value="1000"  step="10" id="customVolume" onchange="volumeSet(this.value)" oninput="var str = document.getElementById('custVolume').innerHTML = this.value" disabled /> 
+ -->			  </label>
 			</div>
 		</div>
 		</br>
 		<div class="row">
 				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-info btn-circle btn-xl" type="button" id="btnNormal" value="Normal" / disabled>
+					<input class="btn btn-outline-success btn-circle btn-xl" type="image" src="/static/img/ambient.png" id="btnNormal" value="Normal" disabled>
 				</div>
 				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-warning btn-circle btn-xl"  type="button" id="btnWarm" value="Warm"/ disabled>
+					<input class="btn btn-outline-warning btn-circle btn-xl"  type="image" src="/static/img/tea.png" id="btnWarm" value="Warm" disabled>
 				</div>
 				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-danger btn-circle btn-xl"  type="button" id="btnHot" value="Hot"/ disabled>
+					<input class="btn btn-outline-danger btn-circle btn-xl"  type="image" src="/static/img/hot.png" id="btnHot" value="Hot" disabled>
 				</div>
 				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-secondary btn-circle btn-xl"  type="button" id="btnStop" value="Stop"/ disabled>
+					<input class="btn btn-outline-secondary btn-circle btn-xl"  type="image" src="/static/img/stop.png" id="btnStop" value="Stop" disabled>
 				</div>
 		</div>
     </div>

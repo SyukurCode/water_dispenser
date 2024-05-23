@@ -9,7 +9,7 @@
 #define HX711_dout 14 //mcu > HX711 dout pin
 #define HX711_sck  12 //mcu > HX711 sck pin
 #define WATER_LEVEL 13
-#define HEATER 5    //d1
+#define HEATER 15    //d6
 #define PUMP 4      //d2 //MUST PWM
 #define MQTT_KEEPALIVE 1000 // keep trying various numbers
 
@@ -591,7 +591,7 @@ void loop()
             isStableReading = false;
             delay(300);
           }
-          if ((millis() - previousMilis) >= 1000)
+          if ((millis() - previousMilis) >= 500)
           {
             if (!isStableReading)
             {
