@@ -97,7 +97,6 @@ function onMessageArrived(message) {
 			ledYellow("off");
 			sendMessage("waterdispenser","/check/0");
 		}
-		document.getElementById("btnReset").disabled = false;
 	}
 	if(myArray[1] == "water")
 	{
@@ -115,7 +114,7 @@ function onMessageArrived(message) {
 		ledYellow("on");
 		let volumereq = 0;
 		let capacity = 0;
-		let offset = 12.0;
+		let offset = 0.0;
 		var percent = myArray[2];
 		if(myArray.length > 2)
 		{
@@ -133,31 +132,19 @@ function onMessageArrived(message) {
 			document.getElementById("btnStop").disabled = false;
 		}
 		document.getElementById("dispenseSpeed").innerHTML = dispenseSpeed.toString();
-		document.getElementById("btnReset").disabled = true;
 	}
-	if(myArray[1] == "measuring")
+	if(myArray[1] == "status" && myArray[2] == "noglass")
 	{
 		disabledAll();
-		document.getElementById("btnReset").disabled = false;
+		ledYellow("off");
+		fm3.setPercentage(0);
+		document.getElementById("capacity").innerHTML = "0";
+		document.getElementById("dispenseSpeed").innerHTML = "0";
 	}
-	if(myArray[1] == "glass")
+	if(myArray[1] == "status" && myArray[2] == "ready")
 	{
 		ledYellow("off");
-		glassWeight = myArray[2];
-		
-		disabledAll();
-		
-		if(glassWeight > 5.0)
-		{
-			enabledAll()
-		}
-		if(glassWeight < 5.0)
-		{
-			fm3.setPercentage(0);
-			document.getElementById("capacity").innerHTML = "0";
-			document.getElementById("dispenseSpeed").innerHTML = "0";
-		}
-		document.getElementById("btnReset").disabled = false;
+		enabledAll()
 	}
 }
 function sendMessage(destination,msg)
@@ -315,9 +302,6 @@ document.getElementById("btnHot").addEventListener("click", function (event) {
 document.getElementById("btnStop").addEventListener("click", function (event) {
 	sendMessage("waterdispenser","/stop/0");
 	document.getElementById("btnStop").disabled = true;
-});
-document.getElementById("btnReset").addEventListener("click", function (event) {
-	sendMessage("waterdispenser","/tare/0");
 });
 document.getElementById("flexRadioDefault5").addEventListener("click", function (event) {
 	if(document.getElementById("flexRadioDefault5").checked)

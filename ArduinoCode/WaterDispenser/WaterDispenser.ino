@@ -1,23 +1,19 @@
+
 #include <WiFiManager.h>
 #include <PubSubClient.h>
-#include <HX711_ADC.h>
 #if defined(ESP8266)|| defined(ESP32) || defined(AVR)
 #include <EEPROM.h>
 #endif
 
 //pins:
-#define HX711_dout 14 //mcu > HX711 dout pin
-#define HX711_sck  12 //mcu > HX711 sck pin
-#define WATER_LEVEL 13
-#define HEATER 15    //d6
-#define PUMP 4      //d2 //MUST PWM
+#define WATER_LEVEL 13 //D7
+#define HEATER 15    //D8
+#define PUMP 4      //D2 //MUST PWM
+#define TRIGGER_PIN 0 //D3
+#define OPTICAL_SENSOR 14 //D5
+
 #define MQTT_KEEPALIVE 1000 // keep trying various numbers
 
-//HX711 constructor:
-HX711_ADC LoadCell(HX711_dout, HX711_sck);
-
-const int calVal_eepromAdress = 0;
-unsigned long t = 0;
 float previousValue = 0;
 unsigned long previousMilis = 0;
 boolean isStableReading = false;
@@ -44,7 +40,9 @@ void setup()
   pinMode(WATER_LEVEL, INPUT);
   pinMode(HEATER, OUTPUT);
   pinMode(PUMP, OUTPUT);
-
+  pinMode(TRIGGER_PIN, INPUT_PULLUP);
+  pinMode(OPTICAL_SENSOR, INPUT);
+  
   digitalWrite(PUMP, LOW);
   digitalWrite(HEATER, LOW);
 
@@ -57,27 +55,6 @@ void setup()
 
   if (!res) Serial.println("Failed to connect");
   else Serial.println("connected to wifi");
-
-  LoadCell.begin();
-  float calibrationValue; // calibration value (see example file "Calibration.ino")
-#if defined(ESP8266)|| defined(ESP32)
-  EEPROM.begin(512); // uncomment this if you use ESP8266/ESP32 and want to fetch the calibration value from eeprom
-#endif
-
-  EEPROM.get(calVal_eepromAdress, calibrationValue); // uncomment this if you want to fetch the calibration value from eeprom
-
-  unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
-  boolean _tare = true; //set this to false if you don't want tare to be performed in the next step
-
-  LoadCell.start(stabilizingtime, _tare);
-  if (LoadCell.getTareTimeoutFlag()) {
-    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1);
-  }
-  else {
-    LoadCell.setCalFactor(calibrationValue); // set calibration value (float)
-    Serial.println("Startup is complete");
-  }
 
   //MQTT
   client.setKeepAlive(MQTT_KEEPALIVE);
@@ -108,8 +85,8 @@ void setup()
   client.subscribe("waterdispenser");
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {
-
+void callback(char* topic, byte* payload, unsigned int length) 
+{
   String Message = "";
   Serial.print("Message:");
   for (int i = 0; i < length; i++) {
@@ -128,10 +105,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   {
     isStop = true;
   }
-  if (command == "tare")
-  {
-    LoadCell.tareNoDelay();
-  }
   if (command == "status")
   {
     sendMessage("/status/online");
@@ -144,17 +117,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (command == "normal")
   {
     float fValue = value.toFloat();
-    dispenseNormal(fValue, 12.0);
+    dispenseNormal(fValue, 0.0);
   }
   if (command == "hot")
   {
     float fValue = value.toFloat();
-    dispenseHot(fValue, 12.0);
+    dispenseHot(fValue, 0.0);
   }
   if (command == "warm")
   {
     float fValue = value.toFloat();
-    dispenseWarm(fValue, 12.0);
+    dispenseWarm(fValue, 0.0);
   }
   if (command == "check")
   {
@@ -168,33 +141,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (inUse)
       client.publish("alexa", "/status/inuse");
   }
-  if (command == "config")
-  {
-    WiFiManager wm;
-    // set configportal timeout
-    wm.setConfigPortalTimeout(120);
-    if (!wm.startConfigPortal("OnDemandConfig")) {
-      Serial.println("failed to connect and hit timeout");
-      delay(3000);
-      //reset and try again, or maybe put it to deep sleep
-      ESP.restart();
-      delay(5000);
-    }
-  }
-  if(command == "calibrate"){
-    float calibrate_value = value.toFloat();
-    calibrate(calibrate_value);
-    isCalibrate = false; 
-  }
 }
 bool waterCheck()
 {
   if (!digitalRead(WATER_LEVEL))
   {
-    //sendMessage("/water/1");
     return true;
   }
-  //sendMessage("/water/0");
   return false;
 }
 void dispenseWarm(float volume, float offset)
@@ -202,94 +155,67 @@ void dispenseWarm(float volume, float offset)
   isStop = false;
   inUse = true;
   volume = volume - offset;
-  float dispenseSpeed = 0.0;
   bool isComplete = false;
-  int percent, prevPercent = 0;
+  int percent = 0;
   char msg[50];
-  float glassWeight = previousValue;
-  String message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume);
-
+  
   pumpON(50);
   heaterON(true);
   previousMilis = millis();
-  long prevTime = millis();
-  long monitorTime = millis();
+  unsigned long startTime = millis();
+  unsigned long prevTime = millis();
+  unsigned long monitorTime = millis();
+  unsigned long onFinish = volume * 77.77;
+  unsigned long onHeaterOff = (volume - 50) * 77.77;
+  String message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume) + "/speed/" + String(millis() - monitorTime);
   while (!isComplete)
   {
     client.loop();
-    float currentValue = getWeight();
-    //fillter valid value
-    if(currentValue != -10000000.0){
-      if (currentValue >= glassWeight)
-      {
-        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-        if ((millis() - prevTime) > 100 )
-        {
-          float time_taken = (millis() - prevTime)/1000.0;
-          int dispenseVolume = abs(previousValue - currentValue);
-          dispenseSpeed = dispenseVolume/time_taken;
-          message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
-          prevTime = millis();
-          previousValue = currentValue;
-          message.toCharArray(msg, message.length());
-          client.publish(topic, msg);
-        }
-      }
-      if((previousValue - currentValue) >= 50.0) {
-         isStop = true;
-      }
-      //monitor flow
-      if(millis() - monitorTime > 2000){
-          if(dispenseSpeed < 1.0){
-            isStop = true;
-          }
-          monitorTime = millis();
-      }
+    //stage speed
+    if(millis() - startTime > 5000)
+    {
+      pumpON(80);
     }
-    
-    //jika glass diangkat atau tiada air
-    if (isStop || digitalRead(WATER_LEVEL))
+    if(millis() - startTime > onFinish)
+    {
+      pumpON(0);
+      isComplete = true;
+      Serial.println("Finish");
+      message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+    }
+    if(millis() - startTime >= onHeaterOff )
     {
       heaterON(false);
-      delay(2000);
+      sendMessage("/debug/Heater_off");
+    }
+    if ((millis() - prevTime) > 100 )
+    {
+      percent = map(millis() - monitorTime, 0, onFinish, 0, 100);
+      message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+      prevTime = millis();
+      message.toCharArray(msg, message.length());
+      client.publish(topic, msg);
+    }
+
+    //jika glass diangkat atau tiada air
+    if (isStop || digitalRead(WATER_LEVEL) || digitalRead(OPTICAL_SENSOR))
+    {
       pumpON(0);
+      heaterON(false);
       isComplete = true;
       isStop = false;
       Serial.println("Stop");
       client.publish(topic, "/status/stop");
       break;
     }
-
-    //prepair to stop
-    if (abs((volume + glassWeight) - currentValue) <= 50.0)
-    {
-      heaterON(false);
-      if (abs((volume + glassWeight) - currentValue) <= 10.0) pumpON(30);
-    }
-    else
-    {
-      if ((millis() - previousMilis) > 5000)
-      {
-        pumpON(80);
-      }
-    }
-    //finish
-    if (currentValue >= volume + glassWeight)
-    {
-      pumpON(0);
-      isComplete = true;
-      Serial.println("Finish");
-      heaterON(false);
-    }
+    
     if (digitalRead(WATER_LEVEL))
     {
-      heaterON(false);
       pumpON(0);
       isComplete = true;
       Serial.println("No Water");
       break;
     }
-
     yield();
   }
 }
@@ -298,87 +224,61 @@ void dispenseHot(float volume, float offset)
   isStop = false;
   inUse = true;
   volume = volume - offset;
-  float dispenseSpeed = 0.0;
   bool isComplete = false;
-  int percent, prevPercent = 0;
+  int percent = 0;
   char msg[50];
-  float glassWeight = previousValue;
-  String message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume);
-
+  
   pumpON(45);
   heaterON(true);
   previousMilis = millis();
-  long prevTime = millis();
-  long monitorTime = millis();
+  unsigned long startTime = millis();
+  unsigned long prevTime = millis();
+  unsigned long monitorTime = millis();
+  unsigned long onFinish = volume * 102.5;
+  unsigned long onHeaterOff = (volume - 60) * 102.5;
+  String message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume) + "/speed/" + String(millis() - monitorTime);
   while (!isComplete)
   {
     client.loop();
-    float currentValue = getWeight();
-    if(currentValue != -10000000.0){
-      if (currentValue >= glassWeight)
-      {
-        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-        if ((millis() - prevTime) > 100 )
-        {
-          float time_taken = (millis() - prevTime)/1000.0;
-          int dispenseVolume = abs(previousValue - currentValue);
-          dispenseSpeed = dispenseVolume/time_taken;
-          message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
-          prevTime = millis();
-          previousValue = currentValue;
-          message.toCharArray(msg, message.length());
-          client.publish(topic, msg);
-        }
-      }
-      if((previousValue - currentValue) >= 50.0) {
-         isStop = true;
-      }
-      //monitor flow
-      if(millis() - monitorTime > 2000){
-          if(dispenseSpeed < 1.0){
-            isStop = true;
-          }
-          monitorTime = millis();
-      }
+    if(millis() - startTime > 5000)
+    {
+      pumpON(55);
+    }
+    if(millis() - startTime > onFinish)
+    {
+      pumpON(0);
+      isComplete = true;
+      Serial.println("Finish");
+      message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+    }
+    if(millis() - startTime >= onHeaterOff )
+    {
+      heaterON(false);
+      sendMessage("/debug/Heater_off");
+    }
+    if ((millis() - prevTime) > 100 )
+    {
+      percent = map(millis() - monitorTime, 0, onFinish, 0, 100);
+      message = "/filling/" + String(percent) + "/type/hot/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+      prevTime = millis();
+      message.toCharArray(msg, message.length());
+      client.publish(topic, msg);
     }
 
     //jika glass diangkat atau tiada air
-    if (isStop || digitalRead(WATER_LEVEL))
+    if (isStop || digitalRead(WATER_LEVEL) || digitalRead(OPTICAL_SENSOR))
     {
-      heaterON(false);
-      delay(2000);
       pumpON(0);
+      heaterON(false);
       isComplete = true;
       isStop = false;
       Serial.println("Stop");
       client.publish(topic, "/status/stop");
       break;
     }
-
-    //prepair to stop
-    if ((abs(volume + glassWeight) - currentValue) <= 50.0)
-    {
-      heaterON(false);
-      if (abs((volume + glassWeight) - currentValue) <= 10.0) pumpON(30);
-    }
-    else
-    {
-      if ((millis() - previousMilis) > 5000)
-      {
-        pumpON(55);
-      }
-    }
-    //finish
-    if (currentValue >= volume + glassWeight)
-    {
-      pumpON(0);
-      isComplete = true;
-      Serial.println("Finish");
-      heaterON(false);
-    }
+    
     if (digitalRead(WATER_LEVEL))
     {
-      heaterON(false);
       pumpON(0);
       isComplete = true;
       Serial.println("No Water");
@@ -392,59 +292,40 @@ void dispenseNormal(float volume, float offset)
   isStop = false;
   inUse = true;
   volume = volume - offset;
-  float dispenseSpeed = 0.0;
   bool isComplete = false;
-  int percent, prevPercent = 0;
+  int percent = 0;
   char msg[50];
-  float glassWeight = previousValue;
-  String message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
-
-  Serial.print("capacity request :");
-  Serial.print(volume, 0);
-  Serial.println("ml");
-  Serial.print("glass weight :");
-  Serial.print(glassWeight);
-  Serial.println("g");
+  
   pumpON(50);
   previousMilis = millis();
-  long prevTime = millis();
-  long monitorTime = millis();
+  unsigned long startTime = millis();
+  unsigned long prevTime = millis();
+  unsigned long monitorTime = millis();
+  unsigned long onFinish = volume * 107.4;
+  String message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume) + "/speed/" + String(millis() - monitorTime);
   while (!isComplete)
   {
     client.loop();
-    float currentValue = getWeight();
-    if(currentValue != -10000000.0){
-      if (currentValue >= glassWeight)
-      {
-        percent = map(currentValue - glassWeight, 0, volume, 0, 100);
-        //snprintf (msg, 13, "/filling/%ld", percent);
-        message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume);
-        if ((millis() - prevTime) > 100 )
-        {
-          float time_taken = (millis() - prevTime)/1000.0;
-          int dispenseVolume = abs(previousValue - currentValue);
-          dispenseSpeed = dispenseVolume/time_taken;
-          message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume)+ "/speed/" + String(dispenseSpeed);
-          prevTime = millis();
-          previousValue = currentValue;
-          message.toCharArray(msg, message.length());
-          client.publish(topic, msg);
-        }
-      }
-      if((previousValue - currentValue) >= 50.0) {
-         isStop = true;
-      }
-      //monitor flow
-      if(millis() - monitorTime > 2000){
-          if(dispenseSpeed < 1.0){
-            isStop = true;
-          }
-          monitorTime = millis();
-      }
+
+    if(millis() - startTime > onFinish)
+    {
+      pumpON(0);
+      isComplete = true;
+      Serial.println("Finish");
+      message = "/filling/" + String(percent) + "/type/warm/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+    }
+    
+    if ((millis() - prevTime) > 100 )
+    {
+      percent = map(millis() - monitorTime, 0, onFinish, 0, 100);
+      message = "/filling/" + String(percent) + "/type/normal/capacity/" + String(volume)+ "/speed/" + String(millis() - monitorTime);
+      prevTime = millis();
+      message.toCharArray(msg, message.length());
+      client.publish(topic, msg);
     }
 
     //jika glass diangkat atau tiada air
-    if (isStop || digitalRead(WATER_LEVEL))
+    if (isStop || digitalRead(WATER_LEVEL) || digitalRead(OPTICAL_SENSOR))
     {
       pumpON(0);
       isComplete = true;
@@ -454,18 +335,6 @@ void dispenseNormal(float volume, float offset)
       break;
     }
     
-    //prepair to stop
-    if (abs((volume + glassWeight) - currentValue) <= 10.0)
-    {
-      pumpON(30);
-    }
-    //finish
-    if (currentValue >= volume + glassWeight)
-    {
-      pumpON(0);
-      isComplete = true;
-      Serial.println("Finish");
-    }
     if (digitalRead(WATER_LEVEL))
     {
       pumpON(0);
@@ -490,37 +359,21 @@ String getValue(String data, char separator, int index) {
   }
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-float getWeight()
-{
-  static boolean newDataReady = 0;
-  // check for new data/start next conversion:
-  if (LoadCell.update()) newDataReady = true;
-
-  // get smoothed value from the dataset:
-  if (newDataReady) {
-    if (millis() > t) {
-      float i = LoadCell.getData();
-      newDataReady = 0;
-      t = millis();
-
-      return i;
-    }
-  }
-  return -10000000.0;
-}
 void sendMessage(char* mesg)
 {
   char msg[30];
   int Len = strlen(mesg) + 1;
   snprintf (msg, Len , mesg , 20);
-  client.publish(topic, msg);
+  if(!client.connected()) Serial.println("MQTT not connect");
+  else client.publish(topic, msg);
 }
 void sendMessageInFloat(String message, float value)
 { 
   String mesg = "/" + message + "/" + String(value);
   char msg[30];
   mesg.toCharArray(msg, mesg.length());
-  client.publish(topic, msg);
+  if(!client.connected()) Serial.println("MQTT not connect");
+  else client.publish(topic, msg);
 }
 void heaterON(bool isON)
 {
@@ -542,24 +395,6 @@ boolean reconnect() {
   }
   return client.connected();
 }
-// calibrate
-void calibrate(float known_mass) {
-  LoadCell.refreshDataSet(); //refresh the dataset to be sure that the known mass is measured correct
-  float newCalibrationValue = LoadCell.getNewCalibration(known_mass); //get the new calibration value
-  client.publish(topic, "/message/calibrating");
-  delay(1000);
-
-#if defined(ESP8266)|| defined(ESP32)
-        EEPROM.begin(512);
-#endif
-        EEPROM.put(calVal_eepromAdress, newCalibrationValue);
-#if defined(ESP8266)|| defined(ESP32)
-        EEPROM.commit();
-#endif
-        EEPROM.get(calVal_eepromAdress, newCalibrationValue);
-
-  client.publish(topic, "/message/calibrate_value_was_saved");
-}
 void loop()
 {
     if (!client.connected())
@@ -577,35 +412,27 @@ void loop()
     else
     {
       client.loop();
+      if(inUse) isReadyToDispense = false;
+      if (!digitalRead(OPTICAL_SENSOR))
+      {
+        if(!isReadyToDispense)
+        {
+          isReadyToDispense = true;
+          sendMessage("/status/ready");
+          inUse = false;
+        }
+      }
+      else{
+        if(isReadyToDispense)
+        {
+          isReadyToDispense = false;
+          sendMessage("/status/noglass");
+        }
+      }
+        
       //if waterlevel ok
       if (!digitalRead(WATER_LEVEL))
       {
-        float currentValue = getWeight();
-        //filter valid value
-        if(currentValue != -10000000.0){
-          if (abs(currentValue - previousValue) > 1.0)
-          {
-            previousValue = currentValue;
-            sendMessageInFloat("measuring", currentValue);
-            previousMilis = millis();
-            isStableReading = false;
-            delay(300);
-          }
-          if ((millis() - previousMilis) >= 500)
-          {
-            if (!isStableReading)
-            {
-              isReadyToDispense = false;
-              Serial.print("Glass Weight:");
-              Serial.println(currentValue);
-              isStableReading = true;
-              previousValue = currentValue;
-              sendMessageInFloat("glass", currentValue);
-              if (currentValue >= 5.0) isReadyToDispense = true;
-              inUse = false;
-            }
-          }
-        }
         if (!isWaterOK)
         {
           sendMessage("/water/1");
@@ -618,11 +445,26 @@ void loop()
         sendMessage("/water/0");
         delay(2000);
       }
-
-      if (LoadCell.getTareStatus() == true)
-      {
-        Serial.println("Tare complete");
-        client.publish(topic, "/tare/done");
-      }
     }
+
+   //Ondemand portal
+   if ( digitalRead(TRIGGER_PIN) == LOW) 
+   {
+    
+      WiFiManager wm;    
+
+    //reset settings - for testing
+    //wm.resetSettings();
+  
+    // set configportal timeout
+     wm.setConfigPortalTimeout(1000);
+
+     if (!wm.startConfigPortal("Water_Dispenser")) {
+      Serial.println("failed to connect and hit timeout");
+      delay(3000);
+      //reset and try again, or maybe put it to deep sleep
+      ESP.restart();
+      delay(5000);
+     }
+   }
 }
