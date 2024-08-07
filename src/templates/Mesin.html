@@ -9,108 +9,7 @@
 	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script type="text/javascript" src="/static/js/js-fluid-meter.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<style>
-		body {
-<!-- 			height: 100%;
- -->			margin: 0;
-  			background: gray;
-			padding: 0;
-		}
-		input {
-			text-align: center;
-		}
-		button{
-			text-align: center;
-		}
-		.content {
-			text-align: center;
-			<!-- max-width: 800px;
-			max-height: 800px; -->
-			<!-- margin: auto; -->			
-			background: #D0D3D4 ;
-			padding: 2%;
-			width: 100%;
-<!-- 			height:100%;
- -->		}
-		h1 {
-			max-width: 100%;
-			height: auto;
-		}
-		.btn-circle.btn-xl {
-			min-width: 80px;
-			height: 80px;
-			<!-- height: auto; -->
-			padding-top: 2px;
-<!-- 			border-radius: 40px;-->
-			font-size: auto;
-			text-align: center;
-		}
-		.led-box {
-		  height: 30px;
-		  width: 25%;
-		  margin: 10px 0;
-		  float: left;
-		}
-
-		.led-box p {
-		  font-size: 12px;
-		  text-align: center;
-		  margin: 1em;
-		  padding-bottom: 5%;
-		}
-
-		.led-green {
-			margin: 0 auto;
-			width: 24px;
-			height: 24px;
-			background-color: #144C05;
-			border-radius: 50%;
-			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 0px;
-		}
-		
-		.led-yellow {
-			margin: 0 auto;
-			width: 24px;
-			height: 24px;
-			background-color: #AA0;
-			border-radius: 50%;
-			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #808002 0 -1px 9px, #FF0 0 2px 0px;
-	    }
-		
-		.led-red {
-			margin: 0 auto;
-			width: 24px;
-			height: 24px;
-			background-color: #A00;
-			border-radius: 50%;
-			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 0px;
-		}
-		
-		.led-blue {
-			margin: 0 auto;
-			width: 24px;
-			height: 24px;
-			background-color: #135A6A;
-			border-radius: 50%;
-			box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #006 0 -1px 9px, #3F8CFF 0 2px 0px;
-		}
-		.text-show {
-			margin: 0 auto;
-			font-size: 18px;
-			text-align: left;
-		}
-		.check-box-show {
-			border:1px; 
-			border-style: dashed; 
-			background-color: #F2F3F4;
-		}
-		.volume-active {
-			background-color: CornflowerBlue;
-		}
-		.font-volume {
-			font-size: 200%;
-		}
-	</style>
+	<link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 	<div class="content" id="screen">
@@ -133,71 +32,103 @@
 			</div>
 		</div>
 		<hr>
-		<div class="row text-center">
+		<div class="row">
 				<label>Time :<strong id="dispenseSpeed"> 0</strong> ms</label> 
 				<label>Type :<strong id="type"> unknown</strong></label>
 				<label>Capacity :<strong id="capacity"> 0</strong>/<strong id="request">0</strong> ml</label>
 				<div id="fluid-meter-3"></div>
 		</div>
-		</br>
-		<div class="row">
-			<div class="col-3 check-box-show" id="volume-1">
-			  <label class="form-check-label" for="flexRadioDefault1">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault1" onclick="volumeSet(this.value,'volume-1')" value="125" disabled>
-				<span class="text-show font-volume" id="showVolume">125</span>ml
-			  </label>
-			</div>
-			<div class="col-3 check-box-show volume-active" id="volume-2">
-			  <label class="form-check-label" for="flexRadioDefault2">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault2" onclick="volumeSet(this.value,'volume-2')" value="250" checked disabled>
-				<span class="text-show font-volume" id="showVolume">250</span>ml
-			  </label>
-			</div>
-			<div class="col-3 check-box-show" id="volume-3">
-			  <label class="form-check-label" for="flexRadioDefault3">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault3" onclick="volumeSet(this.value,'volume-3')" value="300" disabled>
-					<span class="text-show font-volume" id="showVolume">300</span>ml
-			  </label>
-			</div>
-			<div class="col-3 check-box-show" id="volume-4"> 
-			  <label class="form-check-label" for="flexRadioDefault4">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault4" onclick="volumeSet(this.value,'volume-4')" value="500" disabled>
-					<span class="text-show font-volume" id="showVolume" >500</span>ml
-			  </label>
-			</div>
-			
-			<div class="col-12 check-box-show" id="volume-5">
-			  <label class="form-check-label" for="flexRadioDefault5">
-			  <input class="form-check-input" type="radio" name="WaterVolume" id="flexRadioDefault5" value="1000" onclick="volumeSet(this.value,'volume-5')" />
-					<span class="text-show font-volume" id="custVolume">1000</span>ml
-<!-- 					<input class="form-range" type="range" min="100" max="2500" value="1000"  step="10" id="customVolume" onchange="volumeSet(this.value)" oninput="var str = document.getElementById('custVolume').innerHTML = this.value" disabled /> 
- -->			  </label>
-			</div>
+		<div class="radio-inputs">
+			<label for="flexRadioDefault1">
+				<input id="flexRadioDefault1" class="radio-input" type="radio" name="WaterVolume" value="125" onclick="volumeSet(this.value)" disabled>
+					<span class="radio-tile">
+						<span class="radio-icon">
+						</span>
+						<span class="radio-label">125ml</span>
+					</span>
+			</label>
+			<label for="flexRadioDefault2">
+				<input id="flexRadioDefault2" checked="" class="radio-input" type="radio" name="WaterVolume" value="250" onclick="volumeSet(this.value)" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+					</span>
+					<span class="radio-label">250ml</span>
+				</span>
+			</label>
+			<label for="flexRadioDefault3">
+				<input id="flexRadioDefault3" class="radio-input" type="radio" name="WaterVolume" value="300" onclick="volumeSet(this.value)" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+					</span>
+					<span class="radio-label">300ml</span>
+				</span>
+			</label>
 		</div>
-		</br>
-		<div class="row">
-				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-outline-success btn-circle btn-xl" type="image" src="/static/img/ambient.png" id="btnNormal" value="Normal" disabled>
-				</div>
-				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-outline-warning btn-circle btn-xl"  type="image" src="/static/img/tea.png" id="btnWarm" value="Warm" disabled>
-				</div>
-				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-outline-danger btn-circle btn-xl"  type="image" src="/static/img/hot.png" id="btnHot" value="Hot" disabled>
-				</div>
-				<div class="col-3 text-center" style="padding-top:2%">
-					<input class="btn btn-outline-secondary btn-circle btn-xl"  type="image" src="/static/img/stop.png" id="btnStop" value="Stop" disabled>
-				</div>
+		<div class="radio-inputs">
+			<label for="flexRadioDefault4">
+				<input id="flexRadioDefault4" class="radio-input" type="radio" name="WaterVolume" value="500" onclick="volumeSet(this.value)" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+					</span>
+					<span class="radio-label">500ml</span>
+				</span>
+			</label>
+			<label for="flexRadioDefault5">
+				<input id="flexRadioDefault5" class="radio-input" type="radio" name="WaterVolume" value="1000" onclick="volumeSet(this.value)" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+					</span>
+					<span class="radio-label">1000ml</span>
+				</span>
+			</label>
+		</div>
+		<div class="radio-inputs">
+			<label>
+				<input class="radio-input" type="button" id="btnNormal" value="Normal" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+						<img src="/static/img/ambient.png" class="rounded" alt="Normal" style="width:28px;height:28px;">
+					</span>
+					<span class="button-label">Normal</span>
+				</span>
+			</label>
+			<label>
+				<input class="radio-input"  type="button" id="btnWarm" value="Warm" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+						<img src="/static/img/tea.png" class="rounded" alt="Warm" style="width:28px;height:28px;">
+					</span>
+					<span class="button-label">Warm</span>
+				</span>
+			</label>
+			<label>
+				<input class="radio-input"  type="button" id="btnHot" value="Hot" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+						<img src="/static/img/hot.png" class="rounded" alt="Hot" style="width:28px;height:28px;">
+					</span>
+					<span class="button-label">Hot</span>
+				</span>
+			</label>
+			<label>
+				<input class="radio-input"  type="button" id="btnStop" value="Stop" disabled>
+				<span class="radio-tile">
+					<span class="radio-icon">
+						<img src="/static/img/stop.png" class="rounded" alt="Stop" style="width:28px;height:28px;">
+					</span>
+					<span class="button-label">Stop</span>
+				</span>
+			</label>
 		</div>
     </div>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/static/js/main.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="/static/js/main.js"></script>
 </body>
 </html> 

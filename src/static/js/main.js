@@ -225,6 +225,7 @@ function disabledAll()
 	document.getElementById("flexRadioDefault2").disabled = true;
 	document.getElementById("flexRadioDefault3").disabled = true;
 	document.getElementById("flexRadioDefault4").disabled = true;
+	document.getElementById("flexRadioDefault5").disabled = true;
 }	
 function enabledAll()
 {
@@ -235,24 +236,15 @@ function enabledAll()
 	document.getElementById("flexRadioDefault2").disabled = false;
 	document.getElementById("flexRadioDefault3").disabled = false;
 	document.getElementById("flexRadioDefault4").disabled = false;
+	document.getElementById("flexRadioDefault5").disabled = false;
 	ledGreen("on");
 	document.getElementById("btnStop").disabled = true;
 }
-function volumeSet(ml,active)
+function volumeSet(ml)
 {
 	console.log(ml);
 	console.log(active);
 	capacityRequest = ml;
-/* 	if(document.getElementById("flexRadioDefault5").checked)
-		document.getElementById("customVolume").disabled = false;
-	else
-		document.getElementById("customVolume").disabled = true; */
-	
-	for(let i=1;i<6;i++){
-		document.getElementById("volume-" + i ).classList.remove("volume-active");
-	}
-	
-	document.getElementById(active).classList.add("volume-active");
 }
 document.getElementById("btnNormal").addEventListener("click", function (event) {
 	if(capacityRequest > 2500)
@@ -302,12 +294,6 @@ document.getElementById("btnHot").addEventListener("click", function (event) {
 document.getElementById("btnStop").addEventListener("click", function (event) {
 	sendMessage("waterdispenser","/stop/0");
 	document.getElementById("btnStop").disabled = true;
-});
-document.getElementById("flexRadioDefault5").addEventListener("click", function (event) {
-	if(document.getElementById("flexRadioDefault5").checked)
-		document.getElementById("customVolume").disabled = false;
-	else
-		document.getElementById("customVolume").disabled = true;
 });
 /* if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
 	const isPortrait = window.matchMedia('(orientation: portrait)').matches;

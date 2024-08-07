@@ -19,7 +19,7 @@ function FluidMeter() {
     drawBubbles: true,
     fontSize: "70px",
     fontFamily: "Arial",
-    fontFillStyle: "white",
+    fontFillStyle: "black",
     size: 200,
     borderWidth: 25,
     backgroundColor: "#e2e2e2",
