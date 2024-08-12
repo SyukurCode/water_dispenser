@@ -243,7 +243,7 @@ function enabledAll()
 function volumeSet(ml)
 {
 	console.log(ml);
-	console.log(active);
+	/* console.log(active); */
 	capacityRequest = ml;
 }
 document.getElementById("btnNormal").addEventListener("click", function (event) {
