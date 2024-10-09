@@ -7,6 +7,7 @@ $( '.container' ).height( $winHeight );
 //led
 var capacityRequest = 250;
 var client = new Paho.MQTT.Client("myqs-bunker.ddns.net", Number(80), clientid);
+var secondaryClient = new Paho.MQTT.Client("192.168.0.88", Number(9001), clientid);
 var glassWeight = 0;
 
 
@@ -44,12 +45,36 @@ fm3.init({
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
+// Connection options for primary broker
+var options = {
+  timeout: 3,
+  userName: "syukur",     // Add username
+  password: "syukur123***",     // Add password
+  onSuccess: onConnect,
+  onFailure: function (error) {
+    console.log("Failed to connect to primary broker. Attempting secondary...");
+    connectToSecondaryBroker();
+  }
+};
+
+// Function to connect to secondary broker
+function connectToSecondaryBroker() {
+  var secondaryOptions = {
+    timeout: 3,
+    userName: "syukur",     // Add username
+    password: "syukur123**",     // Add password
+    onSuccess: onConnect,
+    onFailure: function (error) {
+      console.log("Failed to connect to secondary broker", error);
+    }
+  };
+
+  secondaryClient.connect(secondaryOptions);
+}
+
 // connect the client
-client.connect({ 
-	onSuccess: onConnect,
-	userName: "syukur",
-	password: "syukur123***"
-});
+client.connect(options);
+
 function getTimestampInSeconds() {
 return Math.floor(Date.now() / 1000)
 }
@@ -103,6 +128,7 @@ function onMessageArrived(message) {
 		if(myArray[2] == 0)
 		{
 			ledBlue("off");
+			document.getElementById("Status").innerHTML = "Low water!.";
 		}
 		if(myArray[2] == 1)
 		{
@@ -132,6 +158,7 @@ function onMessageArrived(message) {
 			document.getElementById("btnStop").disabled = false;
 		}
 		document.getElementById("dispenseSpeed").innerHTML = dispenseSpeed.toString();
+		document.getElementById("Status").innerHTML = "Filling...";
 	}
 	if(myArray[1] == "status" && myArray[2] == "noglass")
 	{
@@ -140,11 +167,13 @@ function onMessageArrived(message) {
 		fm3.setPercentage(0);
 		document.getElementById("capacity").innerHTML = "0";
 		document.getElementById("dispenseSpeed").innerHTML = "0";
+		document.getElementById("Status").innerHTML = "";
 	}
 	if(myArray[1] == "status" && myArray[2] == "ready")
 	{
 		ledYellow("off");
 		enabledAll()
+		document.getElementById("Status").innerHTML = "Ready!.";
 	}
 }
 function sendMessage(destination,msg)

@@ -12,115 +12,117 @@
 	<link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-	<div class="content" id="screen">
+	<div class="content" id="screen" style="max-width:100%">
 		<div class="row">
 			<div class="col-3 text-end led-box">
 				<div id="ledStatus" class="led-red"></div>
-				<p>On/Off</p>
+				<p class="font-desktop">On/Off</p>
 			</div>
 			<div class="col-3 text-end led-box">
 				<div id="ledReady" class="led-green"></div>
-				<p>Ready</p>
+				<p class="font-desktop">Ready</p>
 			</div>
 			<div class="col-3 text-end led-box">
 				<div id="ledFilling" class="led-yellow"></div>
-				<p>Filling</p>
+				<p class="font-desktop">Filling</p>
 			</div>
 			<div class="col-3 text-end led-box">
 				<div id="ledWater" class="led-blue"></div>
-				<p>Water</p>
+				<p class="font-desktop">Water</p>
 			</div>
 		</div>
 		<hr>
 		<div class="row">
-				<label>Time :<strong id="dispenseSpeed"> 0</strong> ms</label> 
-				<label>Type :<strong id="type"> unknown</strong></label>
-				<label>Capacity :<strong id="capacity"> 0</strong>/<strong id="request">0</strong> ml</label>
+			<div class="col-3">
+				<label class="font-desktop">Time :<strong id="dispenseSpeed"> 0</strong> ms</label><br>
+				<label class="font-desktop">Type :<strong id="type"> Unknown</strong></label><br>
+				<label class="font-desktop">Capacity :<strong id="capacity"> 0</strong>/<strong id="request">0</strong> ml</label>
 				<div id="fluid-meter-3"></div>
-		</div>
-		<div class="radio-inputs">
-			<label for="flexRadioDefault1">
-				<input id="flexRadioDefault1" class="radio-input" type="radio" name="WaterVolume" value="125" onclick="volumeSet(this.value)" disabled>
-					<span class="radio-tile">
-						<span class="radio-icon">
+				<label style="font-weight:bold; font-size:50px" id="Status"></label>
+			</div>
+			<div class="col-9">
+				<div class="radio-inputs-desktop">
+					<label for="flexRadioDefault1">
+						<input id="flexRadioDefault1" class="radio-input" type="radio" name="WaterVolume" value="125" onclick="volumeSet(this.value)" disabled>
+							<span class="radio-tile">
+								<span class="radio-icon">
+								</span>
+								<span class="radio-label">125ml</span>
+							</span>
+					</label>
+					<label for="flexRadioDefault2">
+						<input id="flexRadioDefault2" checked="" class="radio-input" type="radio" name="WaterVolume" value="250" onclick="volumeSet(this.value)" disabled>
+						<span class="radio-tile">
+							<span class="radio-icon">
+							</span>
+							<span class="radio-label">250ml</span>
 						</span>
-						<span class="radio-label">125ml</span>
-					</span>
-			</label>
-			<label for="flexRadioDefault2">
-				<input id="flexRadioDefault2" checked="" class="radio-input" type="radio" name="WaterVolume" value="250" onclick="volumeSet(this.value)" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-					</span>
-					<span class="radio-label">250ml</span>
-				</span>
-			</label>
-			<label for="flexRadioDefault3">
-				<input id="flexRadioDefault3" class="radio-input" type="radio" name="WaterVolume" value="300" onclick="volumeSet(this.value)" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-					</span>
-					<span class="radio-label">300ml</span>
-				</span>
-			</label>
+					</label>
+					<label for="flexRadioDefault3">
+						<input id="flexRadioDefault3" class="radio-input" type="radio" name="WaterVolume" value="300" onclick="volumeSet(this.value)" disabled>
+						<span class="radio-tile">
+							<span class="radio-icon">
+							</span>
+							<span class="radio-label">300ml</span>
+						</span>
+					</label>
+					<label for="flexRadioDefault4">
+						<input id="flexRadioDefault4" class="radio-input" type="radio" name="WaterVolume" value="500" onclick="volumeSet(this.value)" disabled>
+						<span class="radio-tile">
+							<span class="radio-icon">
+							</span>
+							<span class="radio-label">500ml</span>
+						</span>
+					</label>
+					<label for="flexRadioDefault5">
+						<input id="flexRadioDefault5" class="radio-input" type="radio" name="WaterVolume" value="1000" onclick="volumeSet(this.value)" disabled>
+						<span class="radio-tile">
+							<span class="radio-icon">
+							</span>
+							<span class="radio-label">1000ml</span>
+						</span>
+					</label>
+				</div>
+				<div class="radio-inputs-desktop">
+					<label>
+						<input class="radio-input" type="button" id="btnNormal" value="Normal" disabled>
+						<span class="radio-tile-desktop">
+							<span class="radio-icon">
+								<img src="/static/img/ambient.png" class="rounded image-desktop" alt="Normal">
+							</span>
+							<span class="button-label-desktop">Normal</span>
+						</span>
+					</label>
+					<label>
+						<input class="radio-input"  type="button" id="btnWarm" value="Warm" disabled>
+						<span class="radio-tile-desktop">
+							<span class="radio-icon">
+								<img src="/static/img/tea.png" class="rounded image-desktop" alt="Warm">
+							</span>
+							<span class="button-label-desktop">Warm</span>
+						</span>
+					</label>
+					<label>
+						<input class="radio-input"  type="button" id="btnHot" value="Hot" disabled>
+						<span class="radio-tile-desktop">
+							<span class="radio-icon">
+								<img src="/static/img/hot.png" class="rounded image-desktop" alt="Hot">
+							</span>
+							<span class="button-label-desktop">Hot</span>
+						</span>
+					</label><br>
+					<label>
+						<input class="radio-input"  type="button" id="btnStop" value="Stop" disabled>
+						<span class="radio-tile-desktop">
+							<span class="radio-icon">
+								<img src="/static/img/stop.png" class="rounded image-desktop" alt="Stop">
+							</span>
+							<span class="button-label-desktop">Stop</span>
+						</span>
+					</label>
+				</div>
+			</div>
 		</div>
-		<div class="radio-inputs">
-			<label for="flexRadioDefault4">
-				<input id="flexRadioDefault4" class="radio-input" type="radio" name="WaterVolume" value="500" onclick="volumeSet(this.value)" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-					</span>
-					<span class="radio-label">500ml</span>
-				</span>
-			</label>
-			<label for="flexRadioDefault5">
-				<input id="flexRadioDefault5" class="radio-input" type="radio" name="WaterVolume" value="1000" onclick="volumeSet(this.value)" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-					</span>
-					<span class="radio-label">1000ml</span>
-				</span>
-			</label>
-		</div>
-		<div class="radio-inputs">
-			<label>
-				<input class="radio-input" type="button" id="btnNormal" value="Normal" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-						<img src="/static/img/ambient.png" class="rounded" alt="Normal" style="width:28px;height:28px;">
-					</span>
-					<span class="button-label">Normal</span>
-				</span>
-			</label>
-			<label>
-				<input class="radio-input"  type="button" id="btnWarm" value="Warm" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-						<img src="/static/img/tea.png" class="rounded" alt="Warm" style="width:28px;height:28px;">
-					</span>
-					<span class="button-label">Warm</span>
-				</span>
-			</label>
-			<label>
-				<input class="radio-input"  type="button" id="btnHot" value="Hot" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-						<img src="/static/img/hot.png" class="rounded" alt="Hot" style="width:28px;height:28px;">
-					</span>
-					<span class="button-label">Hot</span>
-				</span>
-			</label>
-			<label>
-				<input class="radio-input"  type="button" id="btnStop" value="Stop" disabled>
-				<span class="radio-tile">
-					<span class="radio-icon">
-						<img src="/static/img/stop.png" class="rounded" alt="Stop" style="width:28px;height:28px;">
-					</span>
-					<span class="button-label">Stop</span>
-				</span>
-			</label>
-		</div>
-    </div>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
