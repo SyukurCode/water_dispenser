@@ -6,7 +6,7 @@ $( '.container' ).height( $winHeight );
 });
 //led
 var capacityRequest = 250;
-var client = new Paho.MQTT.Client("myqs-bunker.ddns.net", Number(80), clientid);
+var client = new Paho.MQTT.Client("bunker.tplinkdns.com", Number(80), clientid);
 var secondaryClient = new Paho.MQTT.Client("192.168.0.88", Number(9001), clientid);
 var glassWeight = 0;
 
